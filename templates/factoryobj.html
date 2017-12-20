@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-	<title>three.js webgl - OBJLoader + MTLLoader</title>
+	<title>Factory threejs</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
@@ -31,17 +31,21 @@
 	    <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
 	</div>
 
-	<script src="../build/three.js"></script>
+        <script type="text/javascript" src="../static/three.min.js"></script>
+        <script type="text/javascript" src="../static/OrbitControls.js"></script>
+        <script type="text/javascript" src="../static/CSS2DRenderer.js"></script>
 
-        <script type="text/javascript" src="{{ url_for('static', filename='three.min.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='DDSLoader.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='MTLLoader.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='OBJLoader.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='OrbitControls.js') }}"></script>
+        <script type="text/javascript" src="../static/LoaderSupport.js"></script>
+        <script type="text/javascript" src="../static/DDSLoader.js"></script>
+        <script type="text/javascript" src="../static/MTLLoader.js"></script>
+        <script type="text/javascript" src="../static/OBJLoader.js"></script>
+        <script type="text/javascript" src="../static/OBJLoader2.js"></script>
         
-        <script type="text/javascript" src="{{ url_for('static', filename='Detector.js') }}"></script>
-        
-	<script type="text/javascript" src="{{ url_for('static', filename='Stats.js') }}"></script>
+
+        <script type="text/javascript" src="../static/Detector.js"></script>
+        <script type="text/javascript" src="../static/stats.min.js"></script>
+                
+
 
 	<script>
 	 var container, stats;
@@ -49,15 +53,13 @@
 	 var mouseX = 0, mouseY = 0;
 	 var windowHalfX = window.innerWidth / 2;
 	 var windowHalfY = window.innerHeight / 2;
-         
+         var pointLight, spotLight, spotLight2;
 
 	 init();
 	 animate();
 
          function init() {
-	     container = document.createElement( 'div' );
-	     document.body.appendChild( container );
-
+             
              // SCENE
              scene = new THREE.Scene();
              
@@ -65,38 +67,33 @@
 	     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
              camera.position.z = 20;
              camera.position.y = 10;
+             scene.add(camera);
+
              controls = new THREE.OrbitControls(camera);
-             scene.add( camera );
-             
+             controls.minDistance = 1;
+	     controls.maxDistance = 20;
+	     controls.enablePan = false;
+             controls.maxPolarAngle = Math.PI / 2;
+
 	     // LIGHT
-	     var ambientLight = new THREE.AmbientLight( 0xffffff, 1 );
+	     var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
 	     scene.add( ambientLight );
 
-             /* var pointLight = new THREE.PointLight( 0xffffff, 0.01 );
-              * pointLight.position.set( 10, 10, 10 );
-              * scene.add( pointLight );
 
-              * var pointLightHelper = new THREE.PointLightHelper( pointLight );
-              * scene.add( pointLightHelper );*/
-             
-             /* var width = 2;
-              * var height = 2
-              * var rectLight = new THREE.RectAreaLight( 0xffffff, 500, width, height );
-              * var origin = new THREE.Object3D();
-              * 
-              * rectLight.position.set( 1, 1, 0 );
-              * scene.add( rectLight );
-              * rectLight.lookAt( origin.position );
+             pointLight = new THREE.PointLight( 0xffffff, 0.9 );
+             pointLight.decay = 2;
+             pointLight.position.set(3, 5, 1);
+             scene.add(pointLight);
+             var pointLightHelper = new THREE.PointLightHelper( pointLight );
+             scene.add( pointLightHelper );
 
-              * rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
-              * scene.add( rectLightHelper );*/
+             pointLight = new THREE.PointLight( 0xffffff, 0.3 );
+             pointLight.decay = 2;
+             pointLight.position.set(-2, 3, -3);
+             scene.add(pointLight);
+             var pointLightHelper = new THREE.PointLightHelper( pointLight );
+             scene.add( pointLightHelper );
 
-             /* var spotLight = new THREE.SpotLight( 0xffffff );
-              * spotLight.position.set( 10, 10, 10 );
-              * spotLight.castShadow = true;
-
-              * spotLightHelper = new THREE.SpotLightHelper( spotLight );
-              * scene.add( spotLightHelper );*/
 
              
 	     // MODEL
@@ -106,32 +103,69 @@
 		     console.log( Math.round(percentComplete, 2) + '% downloaded' );
 		 }
 	     };
+
 	     var onError = function ( xhr ) { };
 	     THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
              
-	     var mtlLoader = new THREE.MTLLoader();
-	     mtlLoader.setPath( "../static/models/" );
-	     mtlLoader.load( 'factory_ks.mtl', function( materials ) {
-		 materials.preload();
-		 var objLoader = new THREE.OBJLoader();
-		 objLoader.setMaterials( materials );
-		 objLoader.setPath( "../static/models/" );
-		 objLoader.load( 'factory_ks.obj', function ( object ) {
-		     /* object.position.y = -2;*/
-		     scene.add( object );
-                     
-		 }, onProgress, onError );
-	     });
+             var mtlLoader = new THREE.MTLLoader();
+             mtlLoader.setPath( "../static/models/" );
+             mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
+	     mtlLoader.load( 'factory_ks2.mtl', function( materials ) {
+                 materials.preload();
+                 console.log('material:',materials);
+                 var objLoader = new THREE.OBJLoader();
+                 objLoader.setMaterials( materials );
+                 objLoader.setPath( "../static/models/" );
+                 objLoader.load( 'factory_ks2.obj', function ( object ) {
+                     scene.add( object );
+                 }, onProgress, onError );
+             });
+
 
              
-	     renderer = new THREE.WebGLRenderer();
+             // FLOOR
+             var floor = new THREE.BoxGeometry( 100, 1, 100 );
+             var floor_mat = new THREE.MeshStandardMaterial({color:0xffffff});
+             floor_mat.roughness = 1;
+             var mesh = new THREE.Mesh( floor, floor_mat );
+             mesh.position.set( 0, -0.5, 0 );
+             mesh.receiveShadow = true;
+             scene.add( mesh );
+
+             // TEXT
+             var texts = ["test text"]
+             var element = document.createElement( 'div' );
+             element.className = 'label';
+             element.textContent = texts[0]
+             
+             var label = new THREE.CSS2DObject( element );
+             label.position.set(1,0.2,0.8);
+             scene.add( label );
+             console.log("text label", label);
+
+             // renderer
+             container = document.createElement( 'div' );
+	     document.body.appendChild( container );
+
+	     renderer = new THREE.WebGLRenderer( );
 	     renderer.setPixelRatio( window.devicePixelRatio );
 	     renderer.setSize( window.innerWidth, window.innerHeight );
 	     container.appendChild( renderer.domElement );
-	     document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
+             labelRenderer = new THREE.CSS2DRenderer();
+             labelRenderer.setSize( window.innerWidth, window.innerHeight );
+             labelRenderer.domElement.style.position = 'absolute';
+             labelRenderer.domElement.style.top = '0';
+             labelRenderer.domElement.style.pointerEvents = 'none'
+             container.appendChild( labelRenderer.domElement );
+	     
 	     window.addEventListener( 'resize', onWindowResize, false );
-	 }
+
+             // stats
+             stats = new Stats();
+             container.appendChild(stats.dom);
+             
+	 } // end init
          
 	 function onWindowResize() {
 	     windowHalfX = window.innerWidth / 2;
@@ -141,23 +175,22 @@
 	     renderer.setSize( window.innerWidth, window.innerHeight );
 	 }
          
-	 function onDocumentMouseMove( event ) {
-	     mouseX = ( event.clientX - windowHalfX ) / 2;
-	     mouseY = ( event.clientY - windowHalfY ) / 2;
-	 }
-         
 	 function animate() {
 	     requestAnimationFrame( animate );
-	     render();
+             render();
+             stats.update();
 	 }
-         
-	 function render() {
-	     //camera.position.x += ( mouseX - camera.position.x ) * .05;
-	     //camera.position.y += ( - mouseY - camera.position.y ) * .05;
+
+         function render() {
              controls.update();
-//	     camera.lookAt( scene.position );
+
+
 	     renderer.render( scene, camera );
-	 }
+             labelRenderer.render(scene, camera);
+         }
+         
+
+
 	</script>
 
     </body>

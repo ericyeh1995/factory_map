@@ -1,0 +1,20 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl Shiny cloudy plastic - dark arc
+Kd 0 0.384314 0.419608
+Ks 1 1 1
+
+newmtl Silk blue
+Kd 0 0.219608 0.317647
+Ks 0.129412 0.886275 1
+
+newmtl Glass cubes blue
+Kd 0 0 0
+
+newmtl Hard shiny plastic - deep turqu
+Kd 0.0117647 0.337255 0.258824
+Ks 0.992157 0.992157 0.992157
+
+newmtl Clear rough plastic - electric 
+Kd 0 0 0
+Ks 0.992157 0.992157 0.992157
