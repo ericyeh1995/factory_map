@@ -31,7 +31,7 @@
 	    <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
 	</div>
 
-        <script type="text/javascript" src="../static/three.min.js"></script>
+        <script type="text/javascript" src="../static/three.js"></script>
         <script type="text/javascript" src="../static/OrbitControls.js"></script>
         <script type="text/javascript" src="../static/CSS2DRenderer.js"></script>
 
@@ -76,25 +76,25 @@
              controls.maxPolarAngle = Math.PI / 2;
 
 	     // LIGHT
-	     var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+	     var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
 	     scene.add( ambientLight );
 
 
-             pointLight = new THREE.PointLight( 0xffffff, 0.9 );
-             pointLight.decay = 2;
-             pointLight.position.set(3, 5, 1);
-             scene.add(pointLight);
-             var pointLightHelper = new THREE.PointLightHelper( pointLight );
-             scene.add( pointLightHelper );
+             spotLight = new THREE.SpotLight( 0xffffff );
+             spotLight.intensity = 0.8;
+             spotLight.distance = 20;
+             spotLight.angle = Math.PI/4;
+             spotLight.decay = 1;
+             spotLight.castShadow = true;
+             spotLight.shadow.camera.near = 1;
+             spotLight.shadow.camera.far = 5;
+             spotLight.position.set(0,5,0)
+             scene.add( spotLight );
+             
+             spotLightHelper = new THREE.SpotLightHelper( spotLight );
+             scene.add( spotLightHelper );
 
-             pointLight = new THREE.PointLight( 0xffffff, 0.3 );
-             pointLight.decay = 2;
-             pointLight.position.set(-2, 3, -3);
-             scene.add(pointLight);
-             var pointLightHelper = new THREE.PointLightHelper( pointLight );
-             scene.add( pointLightHelper );
-
-
+             
              
 	     // MODEL
 	     var onProgress = function ( xhr ) {
@@ -110,25 +110,39 @@
              var mtlLoader = new THREE.MTLLoader();
              mtlLoader.setPath( "../static/models/" );
              mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
-	     mtlLoader.load( 'factory_ks2.mtl', function( materials ) {
+	     mtlLoader.load( 'factory_ks4.mtl', function( materials ) {
                  materials.preload();
                  console.log('material:',materials);
                  var objLoader = new THREE.OBJLoader();
                  objLoader.setMaterials( materials );
                  objLoader.setPath( "../static/models/" );
-                 objLoader.load( 'factory_ks2.obj', function ( object ) {
+                 objLoader.load( 'factory_ks4.obj', function ( object ) {
+                     console.log('factory object', object);
+                     
+                     object.children[ 0 ].receiveShadow = true;
+                     object.children[ 0 ].castShadow = true;
+                     object.position.set(0,-0.5,0);
+                     
                      scene.add( object );
                  }, onProgress, onError );
              });
 
 
+             // GEOMETRY
+             var box = new THREE.BoxGeometry( 0.5, 0.5, 0.5 );
+             var box_mat = new THREE.MeshStandardMaterial( 0.1, 0 );
+             var mesh = new THREE.Mesh( box, box_mat );
+             mesh.castShadow = true;
+             mesh.position.set( 3,2,1 );
+             scene.add( mesh );
+             
              
              // FLOOR
              var floor = new THREE.BoxGeometry( 100, 1, 100 );
-             var floor_mat = new THREE.MeshStandardMaterial({color:0xffffff});
+             var floor_mat = new THREE.MeshStandardMaterial({color:0x808080});
              floor_mat.roughness = 1;
              var mesh = new THREE.Mesh( floor, floor_mat );
-             mesh.position.set( 0, -0.5, 0 );
+             mesh.position.set( 0, -1, 0 );
              mesh.receiveShadow = true;
              scene.add( mesh );
 
@@ -143,7 +157,7 @@
              scene.add( label );
              console.log("text label", label);
 
-             // renderer
+             // RENDERER
              container = document.createElement( 'div' );
 	     document.body.appendChild( container );
 
@@ -152,16 +166,24 @@
 	     renderer.setSize( window.innerWidth, window.innerHeight );
 	     container.appendChild( renderer.domElement );
 
+             renderer.gammaInput = true;
+             renderer.gammaOutput = true;
+
+             renderer.shadowMap.enabled = true;
+             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+             // TEXT RENDERER
              labelRenderer = new THREE.CSS2DRenderer();
              labelRenderer.setSize( window.innerWidth, window.innerHeight );
              labelRenderer.domElement.style.position = 'absolute';
              labelRenderer.domElement.style.top = '0';
              labelRenderer.domElement.style.pointerEvents = 'none'
              container.appendChild( labelRenderer.domElement );
-	     
+
+             // WINDOW	     
 	     window.addEventListener( 'resize', onWindowResize, false );
 
-             // stats
+             // STATS
              stats = new Stats();
              container.appendChild(stats.dom);
              
@@ -183,7 +205,6 @@
 
          function render() {
              controls.update();
-
 
 	     renderer.render( scene, camera );
              labelRenderer.render(scene, camera);
