@@ -1,0 +1,26 @@
+# HOW TO: check if they are ignored:
+# git ls-files --others -i --exclude-standard
+
+# mac
+.DS_Store
+
+# ? autosave
+*~
+
+# emacs autosave
+\#*#
+
+# versions
+*.v*
+
+# backups
+*bkup*
+
+# python
+__pycache__/
+
+# jupyter notebook
+.ipynb_checkpoints
+
+# Intellij IDE
+.idea

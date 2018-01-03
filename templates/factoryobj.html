@@ -28,7 +28,7 @@
 
     <body>
 	<div id="info">
-	    <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
+	    3D Factory
 	</div>
 
         <script type="text/javascript" src="../static/three.js"></script>
@@ -41,12 +41,9 @@
         <script type="text/javascript" src="../static/OBJLoader.js"></script>
         <script type="text/javascript" src="../static/OBJLoader2.js"></script>
         
-
         <script type="text/javascript" src="../static/Detector.js"></script>
         <script type="text/javascript" src="../static/stats.min.js"></script>
-                
-
-
+        
 	<script>
 	 var container, stats;
 	 var camera, scene, renderer;
@@ -54,6 +51,9 @@
 	 var windowHalfX = window.innerWidth / 2;
 	 var windowHalfY = window.innerHeight / 2;
          var pointLight, spotLight, spotLight2;
+         
+         var raycaster;
+         var mouse = new THREE.Vector2(), INTERSECTED;
 
 	 init();
 	 animate();
@@ -64,16 +64,16 @@
              scene = new THREE.Scene();
              
              // CAMERA AND CONTROL
-	     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+             camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
              camera.position.z = 20;
              camera.position.y = 10;
              scene.add(camera);
 
              controls = new THREE.OrbitControls(camera);
              controls.minDistance = 1;
-	     controls.maxDistance = 20;
-	     controls.enablePan = false;
-             controls.maxPolarAngle = Math.PI / 2;
+             controls.maxDistance = 20;
+             controls.enablePan = false;
+             controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
 	     // LIGHT
 	     var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
@@ -93,10 +93,8 @@
              
              spotLightHelper = new THREE.SpotLightHelper( spotLight );
              scene.add( spotLightHelper );
-
              
-             
-	     // MODEL
+             // MODEL
 	     var onProgress = function ( xhr ) {
 		 if ( xhr.lengthComputable ) {
 		     var percentComplete = xhr.loaded / xhr.total * 100;
@@ -112,13 +110,10 @@
              mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
 	     mtlLoader.load( 'factory_ks4.mtl', function( materials ) {
                  materials.preload();
-                 console.log('material:',materials);
                  var objLoader = new THREE.OBJLoader();
                  objLoader.setMaterials( materials );
                  objLoader.setPath( "../static/models/" );
                  objLoader.load( 'factory_ks4.obj', function ( object ) {
-                     console.log('factory object', object);
-                     
                      object.children[ 0 ].receiveShadow = true;
                      object.children[ 0 ].castShadow = true;
                      object.position.set(0,-0.5,0);
@@ -147,16 +142,37 @@
              scene.add( mesh );
 
              // TEXT
-             var texts = ["test text"]
-             var element = document.createElement( 'div' );
-             element.className = 'label';
-             element.textContent = texts[0]
+             var texts = ["machine_01"]
+             var machine = {
+                 "machine_01": {
+                     "text_name": "machine_01",
+                     "text_color": [128, 128, 128],
+                     "text_position": [1, -0.3, 0.8],
+                     "box_center": [0, 0, 0],
+                     "box_size": [0, 0, 0],
+                     "light_location": [0, 0, 0]
+                 },
+                 
+                 "machine_02": {
+                     "text_name": "machine_02",
+                     "text_color": [128, 128, 0],
+                     "text_position": [2, -0.3, 0.8]
+                 }
+             };
              
-             var label = new THREE.CSS2DObject( element );
-             label.position.set(1,0.2,0.8);
-             scene.add( label );
-             console.log("text label", label);
+             var text = document.createElement( 'div' );
+             text.className = 'label';
+             text.textContent = texts[0]
+             text.style.color = 'rgb(128,128,128)';
+             
+             var label = new THREE.CSS2DObject(text);
+             label.position.set(1,-0.3,0.8);
+             scene.add(label);
 
+             // INTERACTIVE
+             raycaster = new THREE.Raycaster();
+             document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+             
              // RENDERER
              container = document.createElement( 'div' );
 	     document.body.appendChild( container );
@@ -195,6 +211,13 @@
 	     camera.aspect = window.innerWidth / window.innerHeight;
 	     camera.updateProjectionMatrix();
 	     renderer.setSize( window.innerWidth, window.innerHeight );
+             labelRenderer.setSize( window.innerWidth, window.innerHeight );
+	 }
+
+         function onDocumentMouseMove( event ) {
+	     event.preventDefault();
+	     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 	 }
          
 	 function animate() {
@@ -204,8 +227,26 @@
 	 }
 
          function render() {
-             controls.update();
+             // INTERACTIVE: INTERSECTIONS
+             raycaster.setFromCamera( mouse, camera );
+             var intersects = raycaster.intersectObjects( scene.children );
+             if (intersects.length > 0) {
+                 if ( INTERSECTED != intersects[ 0 ].object ) {
+		     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+		     INTERSECTED = intersects[ 0 ].object;
+		     INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+		     INTERSECTED.material.emissive.setHex( 0x00ccff );
+		 }
+             } else {
+                 
+		 if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+		 INTERSECTED = null;
+             }
+             
+             
 
+             // NORMAL RENDER STUFF
+             controls.update();
 	     renderer.render( scene, camera );
              labelRenderer.render(scene, camera);
          }
