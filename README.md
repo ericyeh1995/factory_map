@@ -2,14 +2,14 @@
 **threejs app for factory monitoring**
 
 ## Functionality
-[x] Factory map in 3D
-[x] Cursor control: orbit, zoom, pan
-[ ] Orbit ball
-[x] Machine name label
-[ ] Real-time machine status light
-[x] Interaction: select on click
-[ ] Real-time data and visualization
-[x] Fast development
+* Factory map in 3D
+* Cursor control: orbit, zoom, pan
+* Orbit ball [TODO]
+* Machine name label
+* Real-time machine status light [TODO]
+* Interaction: select on hover
+* Real-time data and visualization [TODO]
+* Fast development
 ---
 ## Note on code
 ### Set gamma to true for the correct color
@@ -53,6 +53,9 @@ function render() {
 ```
 
 ## Hover to select:
+![alt text][interaction]
+[interaction]: https://github.com/ericyeh1995/factory_map/blob/master/images/interaction.png "interaction"
+
 ```javascript
 var mouse = new THREE.Vector2(), INTERSECTED;
 ```
@@ -90,6 +93,8 @@ function render() {
 ```
 ## Adding label
 Import CSS2DRenderer
+![alt text][label]
+[label]: https://github.com/ericyeh1995/factory_map/blob/master/images/label.png "label"
 ```javascript
 <script type="text/javascript" src="../static/CSS2DRenderer.js"></script>
 ```
@@ -125,7 +130,8 @@ function render() {
 }
 ```
 ## Adding stats
-Import Stats
+![alt text][stats]
+[stats]: https://github.com/ericyeh1995/factory_map/blob/master/images/stats.png "stats"
 ```html
 <script type="text/javascript" src="../static/stats.min.js"></script>
 ```
@@ -140,9 +146,6 @@ function animate() {
     stats.update();
 }
 ```
-
-
-
 
 
 
