@@ -1,6 +1,11 @@
 # Factory Map
 **threejs app for factory monitoring**
 
+![alt text][factory]
+
+[factory]: https://github.com/ericyeh1995/factory_map/blob/master/images/factory.png "factory"
+
+
 ## Functionality
 * Factory map in 3D
 * Cursor control: orbit, zoom, pan
