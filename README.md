@@ -53,6 +53,7 @@ function render() {
 ```
 
 ## Hover to select:
+
 ![alt text][interaction]
 
 [interaction]: https://github.com/ericyeh1995/factory_map/blob/master/images/interaction.png "interaction"
@@ -94,9 +95,11 @@ function render() {
 ```
 ## Adding label
 Import CSS2DRenderer
+
 ![alt text][label]
 
 [label]: https://github.com/ericyeh1995/factory_map/blob/master/images/label.png "label"
+
 ```javascript
 <script type="text/javascript" src="../static/CSS2DRenderer.js"></script>
 ```
@@ -132,9 +135,11 @@ function render() {
 }
 ```
 ## Adding stats
+
 ![alt text][stats]
 
 [stats]: https://github.com/ericyeh1995/factory_map/blob/master/images/stats.png "stats"
+
 ```html
 <script type="text/javascript" src="../static/stats.min.js"></script>
 ```
