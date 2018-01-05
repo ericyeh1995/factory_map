@@ -1,0 +1,33 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl Clear Shiny Plastic Red #2
+Kd 0 0 0
+Ks 0.992157 0.992157 0.992157
+
+newmtl color:202:209:238
+Kd 0.792157 0.819608 0.933333
+Ks 0 0 0
+
+newmtl Chrome Worn #4
+Kd 0 0 0
+Ks 0.996078 0.996078 1
+
+newmtl Clear Shiny Plastic Yellow #3
+Kd 0 0 0
+Ks 0.992157 0.992157 0.992157
+
+newmtl Chrome Worn #4
+Kd 0 0 0
+Ks 0.996078 0.996078 1
+
+newmtl Clear Shiny Plastic Lime Green #2
+Kd 0 0 0
+Ks 0.992157 0.992157 0.992157
+
+newmtl Chrome Worn #4
+Kd 0 0 0
+Ks 0.996078 0.996078 1
+
+newmtl Chrome Worn #4
+Kd 0 0 0
+Ks 0.996078 0.996078 1

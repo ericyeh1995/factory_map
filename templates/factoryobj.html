@@ -40,218 +40,222 @@
         <script type="text/javascript" src="../static/MTLLoader.js"></script>
         <script type="text/javascript" src="../static/OBJLoader.js"></script>
         <script type="text/javascript" src="../static/OBJLoader2.js"></script>
-        
+
         <script type="text/javascript" src="../static/Detector.js"></script>
         <script type="text/javascript" src="../static/stats.min.js"></script>
-        
+
 	<script>
-	 var container, stats;
-	 var camera, scene, renderer;
-	 var mouseX = 0, mouseY = 0;
-	 var windowHalfX = window.innerWidth / 2;
-	 var windowHalfY = window.innerHeight / 2;
-         var pointLight, spotLight, spotLight2;
-         
-         var raycaster;
-         var mouse = new THREE.Vector2(), INTERSECTED;
+        var machine_text = {
+            "machine_01": {
+                "text_name": "machine_01",
+                "text_color": [128, 128, 128],
+                "text_position": [1, -0.3, 0.8],
+            },
 
-	 init();
-	 animate();
-
-         function init() {
-             
-             // SCENE
-             scene = new THREE.Scene();
-             
-             // CAMERA AND CONTROL
-             camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
-             camera.position.z = 20;
-             camera.position.y = 10;
-             scene.add(camera);
-
-             controls = new THREE.OrbitControls(camera);
-             controls.minDistance = 1;
-             controls.maxDistance = 20;
-             controls.enablePan = false;
-             controls.maxPolarAngle = Math.PI / 2 + 0.1;
-
-	     // LIGHT
-	     var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-	     scene.add( ambientLight );
+            "machine_02": {
+                "text_name": "machine_02",
+                "text_color": [128, 128, 0],
+                "text_position": [2, -0.3, 0.8]
+            }
+        };
 
 
-             spotLight = new THREE.SpotLight( 0xffffff );
-             spotLight.intensity = 0.8;
-             spotLight.distance = 20;
-             spotLight.angle = Math.PI/4;
-             spotLight.decay = 1;
-             spotLight.castShadow = true;
-             spotLight.shadow.camera.near = 1;
-             spotLight.shadow.camera.far = 5;
-             spotLight.position.set(0,5,0)
-             scene.add( spotLight );
-             
-             spotLightHelper = new THREE.SpotLightHelper( spotLight );
-             scene.add( spotLightHelper );
-             
-             // MODEL
-	     var onProgress = function ( xhr ) {
-		 if ( xhr.lengthComputable ) {
-		     var percentComplete = xhr.loaded / xhr.total * 100;
-		     console.log( Math.round(percentComplete, 2) + '% downloaded' );
-		 }
-	     };
 
-	     var onError = function ( xhr ) { };
-	     THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
-             
-             var mtlLoader = new THREE.MTLLoader();
-             mtlLoader.setPath( "../static/models/" );
-             mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
-	     mtlLoader.load( 'factory_ks4.mtl', function( materials ) {
-                 materials.preload();
-                 var objLoader = new THREE.OBJLoader();
-                 objLoader.setMaterials( materials );
-                 objLoader.setPath( "../static/models/" );
-                 objLoader.load( 'factory_ks4.obj', function ( object ) {
-                     object.children[ 0 ].receiveShadow = true;
-                     object.children[ 0 ].castShadow = true;
-                     object.position.set(0,-0.5,0);
-                     
-                     scene.add( object );
-                 }, onProgress, onError );
-             });
+        var container, stats;
+        var camera, scene, renderer;
+        var mouseX = 0,
+            mouseY = 0;
+        var windowHalfX = window.innerWidth / 2;
+        var windowHalfY = window.innerHeight / 2;
+        var pointLight, spotLight, spotLight2;
+
+        var raycaster;
+        var mouse = new THREE.Vector2(), INTERSECTED;
+        var interactive_objects;
+
+        init();
+        animate();
+
+        function init() {
+
+            // SCENE
+            scene = new THREE.Scene();
+
+            // CAMERA AND CONTROL
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+            camera.position.z = 20;
+            camera.position.y = 10;
+            scene.add(camera);
+
+            controls = new THREE.OrbitControls(camera);
+            controls.minDistance = 1;
+            controls.maxDistance = 20;
+            controls.enablePan = true;
+            controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+            // LIGHT
+            var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+            scene.add(ambientLight);
+
+            spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.intensity = 0.8;
+            spotLight.distance = 20;
+            spotLight.angle = Math.PI / 4;
+            spotLight.decay = 1;
+            spotLight.castShadow = true;
+            spotLight.shadow.camera.near = 1;
+            spotLight.shadow.camera.far = 5;
+            spotLight.position.set(0, 5, 0)
+            scene.add(spotLight);
+
+            spotLightHelper = new THREE.SpotLightHelper(spotLight);
+            scene.add(spotLightHelper);
+
+            // MODEL
+            var onProgress = function(xhr) {
+                if (xhr.lengthComputable) {
+                    var percentComplete = xhr.loaded / xhr.total * 100;
+                    console.log(Math.round(percentComplete, 2) + '% downloaded');
+                }
+            };
+
+            var onError = function(xhr) {};
+            THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+
+            var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.setPath("../static/models/");
+            mtlLoader.setMaterialOptions({
+                side: THREE.DoubleSide
+            });
+            mtlLoader.load('factory_ks4.mtl', function(materials) {
+                materials.preload();
+                var objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.setPath("../static/models/");
+                objLoader.load('factory_ks4.obj', function(object) {
+                    object.children[0].receiveShadow = true;
+                    object.children[0].castShadow = true;
+                    object.position.set(0, -0.5, 0);
+
+                    scene.add(object);
+                }, onProgress, onError);
+            });
 
 
-             // GEOMETRY
-             var box = new THREE.BoxGeometry( 0.5, 0.5, 0.5 );
-             var box_mat = new THREE.MeshStandardMaterial( 0.1, 0 );
-             var mesh = new THREE.Mesh( box, box_mat );
-             mesh.castShadow = true;
-             mesh.position.set( 3,2,1 );
-             scene.add( mesh );
-             
-             
-             // FLOOR
-             var floor = new THREE.BoxGeometry( 100, 1, 100 );
-             var floor_mat = new THREE.MeshStandardMaterial({color:0x808080});
-             floor_mat.roughness = 1;
-             var mesh = new THREE.Mesh( floor, floor_mat );
-             mesh.position.set( 0, -1, 0 );
-             mesh.receiveShadow = true;
-             scene.add( mesh );
+            // GEOMETRY
+            var box = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
+            var mesh = new THREE.Mesh(box, box_mat);
+            mesh.castShadow = true;
+            mesh.selectable = true;
+            mesh.position.set(3, 2, 1);
+            scene.add(mesh);
 
-             // TEXT
-             var texts = ["machine_01"]
-             var machine = {
-                 "machine_01": {
-                     "text_name": "machine_01",
-                     "text_color": [128, 128, 128],
-                     "text_position": [1, -0.3, 0.8],
-                     "box_center": [0, 0, 0],
-                     "box_size": [0, 0, 0],
-                     "light_location": [0, 0, 0]
-                 },
-                 
-                 "machine_02": {
-                     "text_name": "machine_02",
-                     "text_color": [128, 128, 0],
-                     "text_position": [2, -0.3, 0.8]
-                 }
-             };
-             
-             var text = document.createElement( 'div' );
-             text.className = 'label';
-             text.textContent = texts[0]
-             text.style.color = 'rgb(128,128,128)';
-             
-             var label = new THREE.CSS2DObject(text);
-             label.position.set(1,-0.3,0.8);
-             scene.add(label);
 
-             // INTERACTIVE
-             raycaster = new THREE.Raycaster();
-             document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-             
-             // RENDERER
-             container = document.createElement( 'div' );
-	     document.body.appendChild( container );
+            // FLOOR
+            var floor = new THREE.BoxGeometry(100, 1, 100);
+            var floor_mat = new THREE.MeshStandardMaterial({
+                color: 0x808080
+            });
+            floor_mat.roughness = 1;
+            var mesh = new THREE.Mesh(floor, floor_mat);
+            mesh.position.set(0, -1, 0);
+            mesh.receiveShadow = true;
+            scene.add(mesh);
 
-	     renderer = new THREE.WebGLRenderer( );
-	     renderer.setPixelRatio( window.devicePixelRatio );
-	     renderer.setSize( window.innerWidth, window.innerHeight );
-	     container.appendChild( renderer.domElement );
+            // TEXT
+            var texts = ["machine_01"]
 
-             renderer.gammaInput = true;
-             renderer.gammaOutput = true;
+            var text = document.createElement('div');
+            text.className = 'label';
+            text.textContent = texts[0]
+            text.style.color = 'rgb(128,128,128)';
 
-             renderer.shadowMap.enabled = true;
-             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            var label = new THREE.CSS2DObject(text);
+            label.position.set(1, -0.3, 0.8);
+            scene.add(label);
 
-             // TEXT RENDERER
-             labelRenderer = new THREE.CSS2DRenderer();
-             labelRenderer.setSize( window.innerWidth, window.innerHeight );
-             labelRenderer.domElement.style.position = 'absolute';
-             labelRenderer.domElement.style.top = '0';
-             labelRenderer.domElement.style.pointerEvents = 'none'
-             container.appendChild( labelRenderer.domElement );
+            // INTERACTIVE
+            raycaster = new THREE.Raycaster();
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
 
-             // WINDOW	     
-	     window.addEventListener( 'resize', onWindowResize, false );
+            // RENDERER
+            container = document.createElement('div');
+            document.body.appendChild(container);
 
-             // STATS
-             stats = new Stats();
-             container.appendChild(stats.dom);
-             
-	 } // end init
-         
-	 function onWindowResize() {
-	     windowHalfX = window.innerWidth / 2;
-	     windowHalfY = window.innerHeight / 2;
-	     camera.aspect = window.innerWidth / window.innerHeight;
-	     camera.updateProjectionMatrix();
-	     renderer.setSize( window.innerWidth, window.innerHeight );
-             labelRenderer.setSize( window.innerWidth, window.innerHeight );
-	 }
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
 
-         function onDocumentMouseMove( event ) {
-	     event.preventDefault();
-	     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-	 }
-         
-	 function animate() {
-	     requestAnimationFrame( animate );
-             render();
-             stats.update();
-	 }
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
 
-         function render() {
-             // INTERACTIVE: INTERSECTIONS
-             raycaster.setFromCamera( mouse, camera );
-             var intersects = raycaster.intersectObjects( scene.children );
-             if (intersects.length > 0) {
-                 if ( INTERSECTED != intersects[ 0 ].object ) {
-		     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-		     INTERSECTED = intersects[ 0 ].object;
-		     INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-		     INTERSECTED.material.emissive.setHex( 0x00ccff );
-		 }
-             } else {
-                 
-		 if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-		 INTERSECTED = null;
-             }
-             
-             
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-             // NORMAL RENDER STUFF
-             controls.update();
-	     renderer.render( scene, camera );
-             labelRenderer.render(scene, camera);
-         }
-         
+            // TEXT RENDERER
+            labelRenderer = new THREE.CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0';
+            labelRenderer.domElement.style.pointerEvents = 'none'
+            container.appendChild(labelRenderer.domElement);
 
+            // WINDOW        
+            window.addEventListener('resize', onWindowResize, false);
+
+            // STATS
+            stats = new Stats();
+            container.appendChild(stats.dom);
+
+        } // end init
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+            stats.update();
+        }
+
+        function render() {
+
+            // INTERACTIVE: INTERSECTIONS
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(scene.children.filter(function(object) {
+                return object.selectable; // selectable only on object with cast shadow set true
+            }));
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                    INTERSECTED.material.emissive.setHex(0x403010);
+                }
+            } else {
+                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                INTERSECTED = null;
+            }
+
+            // NORMAL RENDER STUFF
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
 
 	</script>
 
