@@ -1,0 +1,21 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl Glass Cubes Red #1
+Kd 0 0 0
+Ks 0.67451 0.027451 0.027451
+
+newmtl color:202:209:238
+Kd 0.792157 0.819608 0.933333
+Ks 0 0 0
+
+newmtl Glass Cubes Orange #3
+Kd 0 0 0
+Ks 1 0.51667 0
+
+newmtl Glass Cubes Grey #1
+Kd 0 0 0
+Ks 0.00202945 0.417914 0.00202945
+
+newmtl Chrome Horizontal Mesh 2 #4
+Kd 0 0 0
+Ks 0.941176 0.941176 0.941176
