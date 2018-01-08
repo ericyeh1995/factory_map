@@ -73,3 +73,29 @@ var box_mat = new THREE.MeshStandardMaterial( 0.1, 0 );
 var mesh = new THREE.Mesh( box, box_mat );
 mesh.position.set( 0,2,0 );
 scene.add( mesh );
+
+
+
+
+
+
+            // INTERACTIVE: INTERSECTIONS
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(interactive_objects);
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    console.log('intersect change');
+                    if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.currentHex = INTERSECTED.material[0].emissive.getHex();
+                    INTERSECTED.material[0].emissive.setHex(0xff3010);
+                }
+            } else {
+                if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
+                INTERSECTED = null;
+            }
+
+
+
+
+

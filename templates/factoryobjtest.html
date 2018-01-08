@@ -84,13 +84,13 @@
             // CAMERA AND CONTROL
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
             camera.position.z = 20000;
-            camera.position.y = 10000;
-            camera.position.x = 5000;
+            camera.position.y = 20000;
+            camera.position.x = 20000;
             scene.add(camera);
 
             controls = new THREE.OrbitControls(camera);
-            controls.minDistance = 1;
-            //controls.maxDistance = 20;
+            controls.minDistance = 1000;
+            controls.maxDistance = 50000;
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
@@ -113,30 +113,59 @@
             scene.add(spotLightHelper);
 
             // MODEL
-            function addModel(modelName) {
-                var mtlLoader, objLoader
-                mtlLoader = new THREE.MTLLoader();
-                mtlLoader.setPath("../static/models/");
-                mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
+            modelPath = "../static/models/collection/"
+            modelNames = ['dam', 'e2', 'str37'];
+            modelNames.forEach(function(modelName){
 
+                var mtlLoader, objLoader
+                THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+                mtlLoader = new THREE.MTLLoader();
+                mtlLoader.setPath(modelPath);
+                mtlLoader.setMaterialOptions({side: THREE.DoubleSide});
                 mtlLoader.load(modelName+'.mtl', function(materials) {
+
                     materials.preload();
                     objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.setPath("../static/models/");
+                    objLoader.setPath(modelPath);
                     objLoader.load(modelName+'.obj', function(object) {
-                        object.children[0].receiveShadow = true;
-                        object.children[0].castShadow = true;
-                        object.position.set(0, -0.5, 0);
-                        interactive_objects.push(object.children[0]);
 
-                        scene.add(object);
+                        obj_mesh = object.children[0];
+                        obj_mesh.receiveShadow = true;
+                        obj_mesh.castShadow = true;
+                        obj_mesh.position.set(0, 0, 0);
+                        obj_mesh.name = modelName;
+                        
+                        // INTERACTION CODE - variable for scaling
+                        obj_mesh.geometry.computeBoundingBox();
+                        var geometryBox = obj_mesh.geometry.boundingBox;
+                        obj_mesh.middle = new THREE.Vector3();
+                        obj_mesh.middle.x = (geometryBox.max.x + geometryBox.min.x) / 2;
+                        obj_mesh.middle.y = (geometryBox.max.y + geometryBox.min.y) / 2;
+                        obj_mesh.middle.z = (geometryBox.max.z + geometryBox.min.z) / 2;
+
+                        // INTERACTIVE CODE - bounding box for selecting
+                        var boundingGeometry = new THREE.BoxGeometry(
+                            geometryBox.max.x - geometryBox.min.x,
+                            geometryBox.max.y - geometryBox.min.y,
+                            geometryBox.max.z - geometryBox.min.z);
+                        var selectable = new THREE.Mesh( boundingGeometry, new THREE.MeshBasicMaterial({
+                            color: 0x801010,
+                            wireframe: true,
+                            //opacity: 0.3
+                        }));
+                        selectable.position.set(obj_mesh.middle.x, obj_mesh.middle.y, obj_mesh.middle.z);
+                        selectable.object = obj_mesh;
+                        scene.add(selectable);
+                        interactive_objects.push(selectable);
+
+
+                        scene.add(obj_mesh);
+                        console.log('OBJ file loaded: '+modelPath+modelName);
+
                     }, onProgress, onError);
                 });
-            };
-
-            modelNames = ['collection/dam', 'collection/e2', 'collection/str37'];
-            modelNames.forEach(addModel);
+            });
 
 
             // GEOMETRY
@@ -145,7 +174,8 @@
             var mesh = new THREE.Mesh(box, box_mat);
             mesh.castShadow = true;
             mesh.selectable = true;
-            mesh.position.set(300, 200, 100);
+            mesh.position.set(0, 500, 0);
+            mesh.name = 'box'
             scene.add(mesh);
 
 
@@ -158,6 +188,7 @@
             var mesh = new THREE.Mesh(floor, floor_mat);
             mesh.position.set(0, -5, 0);
             mesh.receiveShadow = true;
+            mesh.name = 'floor'
             scene.add(mesh);
 
             // TEXT
@@ -208,6 +239,62 @@
 
         } // end init
 
+        function render() {
+
+            // INTERACTIVE: INTERSECTIONS
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(interactive_objects);
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    if (INTERSECTED) onDeselect(INTERSECTED);
+                    INTERSECTED = intersects[0].object;
+                    onSelect(INTERSECTED, 1.1);
+                }
+            } else {
+                if (INTERSECTED) onDeselect(INTERSECTED);
+                INTERSECTED = null;
+            }
+
+            // CAMERA ROTATE ON START
+            // var timer = Date.now() * 0.0005;
+            // camera.position.x = Math.cos( timer ) * 3;
+            // camera.position.z = Math.sin( timer ) * 3;
+            // camera.lookAt( cameraTarget );
+
+            // NORMAL RENDER STUFF
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+
+
+        // Helper functions
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+            stats.update();
+        }
+
+        var onDeselect = function(mesh) { scaleLocal(mesh, 1); }
+        var onSelect = function(mesh) { scaleLocal(mesh, 1.1); }
+
+        function scaleLocal(box, scale) {
+            // since the origin of the object is at global origin, we need some math in order to scale
+            // locally
+            mesh = box.object;
+            mesh.scale.x = scale;
+            mesh.scale.y = scale;
+            mesh.scale.z = scale;
+
+            var xShift = mesh.middle.x * (1 - scale);
+            var yShift = mesh.middle.y * (1 - scale);
+            var zShift = mesh.middle.z * (1 - scale);
+
+            mesh.position.x = xShift;
+            mesh.position.y = yShift;
+            mesh.position.z = zShift;
+        }
+
         function onWindowResize() {
             windowHalfX = window.innerWidth / 2;
             windowHalfY = window.innerHeight / 2;
@@ -223,41 +310,6 @@
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            render();
-            stats.update();
-        }
-
-        function render() {
-
-            // INTERACTIVE: INTERSECTIONS
-            raycaster.setFromCamera(mouse, camera);
-            var intersects = raycaster.intersectObjects(interactive_objects);
-            // var intersects = raycaster.intersectObjects(scene.children.filter(function(object) {
-            //     return object.selectable; // custom boolean: selectable
-            // }));
-            if (intersects.length > 0) {
-                if (INTERSECTED != intersects[0].object) {
-                    console.log('intersect change');
-                    if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
-                    INTERSECTED = intersects[0].object;
-                    INTERSECTED.currentHex = INTERSECTED.material[0].emissive.getHex();
-                    INTERSECTED.material[0].emissive.setHex(0xff3010);
-                }
-            } else {
-                if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
-                INTERSECTED = null;
-            }
-
-            // NORMAL RENDER STUFF
-            controls.update();
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-
-
-        // Helper functions
         var onProgress = function(xhr) {
             if (xhr.lengthComputable) {
                 var percentComplete = xhr.loaded / xhr.total * 100;
@@ -266,7 +318,8 @@
         };
 
         var onError = function(xhr) {};
-        THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+
+
 
     </script>
 
