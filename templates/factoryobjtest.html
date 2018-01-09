@@ -136,33 +136,10 @@
                         obj_mesh.position.set(0, 0, 0);
                         obj_mesh.name = modelName;
                         
-                        // INTERACTION CODE - variable for scaling
-                        obj_mesh.geometry.computeBoundingBox();
-                        var geometryBox = obj_mesh.geometry.boundingBox;
-                        obj_mesh.middle = new THREE.Vector3();
-                        obj_mesh.middle.x = (geometryBox.max.x + geometryBox.min.x) / 2;
-                        obj_mesh.middle.y = (geometryBox.max.y + geometryBox.min.y) / 2;
-                        obj_mesh.middle.z = (geometryBox.max.z + geometryBox.min.z) / 2;
-
-                        // INTERACTIVE CODE - bounding box for selecting
-                        var boundingGeometry = new THREE.BoxGeometry(
-                            geometryBox.max.x - geometryBox.min.x,
-                            geometryBox.max.y - geometryBox.min.y,
-                            geometryBox.max.z - geometryBox.min.z);
-                        var selectable = new THREE.Mesh( boundingGeometry, new THREE.MeshBasicMaterial({
-                            color: 0x801010,
-                            wireframe: true,
-                            //opacity: 0.3
-                        }));
-                        selectable.position.set(obj_mesh.middle.x, obj_mesh.middle.y, obj_mesh.middle.z);
-                        selectable.object = obj_mesh;
-                        scene.add(selectable);
-                        interactive_objects.push(selectable);
-
+                        makeInteractive(obj_mesh);
 
                         scene.add(obj_mesh);
                         console.log('OBJ file loaded: '+modelPath+modelName);
-
                     }, onProgress, onError);
                 });
             });
@@ -177,7 +154,7 @@
             mesh.position.set(0, 500, 0);
             mesh.name = 'box'
             scene.add(mesh);
-
+            makeInteractive(mesh);
 
             // FLOOR
             var floor = new THREE.BoxGeometry(50000, 10, 50000);
@@ -268,31 +245,66 @@
         }
 
 
-        // Helper functions
+        // HELPER FUNCTIONS
         function animate() {
             requestAnimationFrame(animate);
             render();
             stats.update();
         }
 
+        function makeInteractive(mesh){ 
+
+            // add variable for scaling
+            mesh.geometry.computeBoundingBox();
+            var geometryBox = mesh.geometry.boundingBox;
+            mesh.center = new THREE.Vector3();
+            mesh.center.x = (geometryBox.max.x + geometryBox.min.x) / 2;
+            mesh.center.y = (geometryBox.max.y + geometryBox.min.y) / 2;
+            mesh.center.z = (geometryBox.max.z + geometryBox.min.z) / 2;
+            // TODO: use position.copy
+            mesh.position.orig = new THREE.Vector3();
+            mesh.position.orig.x = mesh.position.x;
+            mesh.position.orig.y = mesh.position.y;
+            mesh.position.orig.z = mesh.position.z;
+
+
+            // bounding box for selecting
+            var boundingGeometry = new THREE.BoxGeometry(
+                geometryBox.max.x - geometryBox.min.x,
+                geometryBox.max.y - geometryBox.min.y,
+                geometryBox.max.z - geometryBox.min.z);
+            var selectable = new THREE.Mesh( boundingGeometry, new THREE.MeshBasicMaterial({
+                color: 0x801010,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            }));
+            selectable.position.set(
+                mesh.center.x + mesh.position.x,
+                mesh.center.y + mesh.position.y,
+                mesh.center.z + mesh.position.z);
+            selectable.object = mesh;
+            selectable.name = mesh.name+'-box';
+            scene.add(selectable);
+            interactive_objects.push(selectable);
+        };
+
         var onDeselect = function(mesh) { scaleLocal(mesh, 1); }
         var onSelect = function(mesh) { scaleLocal(mesh, 1.1); }
 
         function scaleLocal(box, scale) {
-            // since the origin of the object is at global origin, we need some math in order to scale
-            // locally
+            // since the origin of the object is at global origin, we need 
+            // some math in order to scale locally
+            // here, we also scale up the selection box <- try remove this if too slow
+
             mesh = box.object;
-            mesh.scale.x = scale;
-            mesh.scale.y = scale;
-            mesh.scale.z = scale;
+            mesh.scale.set(scale, scale, scale); // scale.set(x_scale, y_scale, z_scale)
+            box.scale.set(scale, scale, scale); 
 
-            var xShift = mesh.middle.x * (1 - scale);
-            var yShift = mesh.middle.y * (1 - scale);
-            var zShift = mesh.middle.z * (1 - scale);
-
-            mesh.position.x = xShift;
-            mesh.position.y = yShift;
-            mesh.position.z = zShift;
+            var xSet = mesh.center.x * (1 - scale) + mesh.position.orig.x;
+            var ySet = mesh.center.y * (1 - scale) + mesh.position.orig.y;
+            var zSet = mesh.center.z * (1 - scale) + mesh.position.orig.z;
+            mesh.position.set(xSet, ySet, zSet);
         }
 
         function onWindowResize() {
