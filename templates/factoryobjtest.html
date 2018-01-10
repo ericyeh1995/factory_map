@@ -80,41 +80,45 @@
 
             // SCENE
             scene = new THREE.Scene();
+            scene.background = new THREE.Color( 0x808080 );
 
             // CAMERA AND CONTROL
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
-            camera.position.z = 20000;
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
+            camera.position.z = 17000;
             camera.position.y = 20000;
-            camera.position.x = 20000;
+            camera.position.x = 17000;
             scene.add(camera);
 
             controls = new THREE.OrbitControls(camera);
             controls.minDistance = 1000;
-            controls.maxDistance = 50000;
+            controls.maxDistance = 100000;
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
             // LIGHT
-            var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+            var ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
 
-            spotLight = new THREE.SpotLight(0xffffff);
-            spotLight.intensity = 2;
-            spotLight.distance = 20000;
-            spotLight.angle = Math.PI / 4;
-            spotLight.decay = 1;
+            spotLight = new THREE.SpotLight({
+                color: 0xffffff,
+                intensity: 1,
+                angle: 0.5,
+                penumbra: 0.3,
+                decay: 1
+            }); //TODO: fix here
+            spotLight.distance = 60000;
             spotLight.castShadow = true;
             spotLight.shadow.camera.near = 1;
             spotLight.shadow.camera.far = 5;
-            spotLight.position.set(0, 10000, 0)
+            spotLight.position.set(4000, 35000, 4000)
             scene.add(spotLight);
 
             spotLightHelper = new THREE.SpotLightHelper(spotLight);
             scene.add(spotLightHelper);
 
             // MODEL
-            modelPath = "../static/models/collection/"
-            modelNames = ['dam', 'e2', 'str37'];
+            modelPath = "../static/models/factoryobj/"
+            modelNames = ['MW8', 'RS11', 'RS4', 'RS7', 'dam', 'RS3', 'RS2', 'RS1', 'B2', 'STR19', 'B3', 'B1', 'Tinning-line', 'str37', 'B5', 'TP1', 'B7', 'RS9', 'RS8', 'B6', 'e5', 'EX6', 'EX7', 'E3', 'e2', 'MW16', 'EX1'];
             modelNames.forEach(function(modelName){
 
                 var mtlLoader, objLoader
@@ -146,24 +150,28 @@
 
 
             // GEOMETRY
-            var box = new THREE.BoxGeometry(500, 500, 500);
-            var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
-            var mesh = new THREE.Mesh(box, box_mat);
-            mesh.castShadow = true;
-            mesh.selectable = true;
-            mesh.position.set(0, 500, 0);
-            mesh.name = 'box'
-            scene.add(mesh);
-            makeInteractive(mesh);
+            // var box = new THREE.BoxGeometry(500, 500, 500);
+            // var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
+            // var mesh = new THREE.Mesh(box, box_mat);
+            // mesh.castShadow = true;
+            // mesh.selectable = true;
+            // mesh.position.set(0, 500, 0);
+            // mesh.name = 'box'
+            // scene.add(mesh);
+            // makeInteractive(mesh);
 
             // FLOOR
             var floor = new THREE.BoxGeometry(50000, 10, 50000);
             var floor_mat = new THREE.MeshStandardMaterial({
-                color: 0x808080
+                color: 0xffffff,
+                //emissive: 0x191919
+                metalness: 0,
+                //opacity: 0.5,
+                //transparent: true
             });
             floor_mat.roughness = 1;
             var mesh = new THREE.Mesh(floor, floor_mat);
-            mesh.position.set(0, -5, 0);
+            mesh.position.set(0, -50, 0);
             mesh.receiveShadow = true;
             mesh.name = 'floor'
             scene.add(mesh);
@@ -277,7 +285,8 @@
                 color: 0x801010,
                 wireframe: true,
                 transparent: true,
-                opacity: 0.3
+                opacity: 0.3,
+                visible: false // <- SETTING
             }));
             selectable.position.set(
                 mesh.center.x + mesh.position.x,
@@ -290,6 +299,7 @@
         };
 
         var onDeselect = function(mesh) { scaleLocal(mesh, 1); }
+
         var onSelect = function(mesh) { scaleLocal(mesh, 1.1); }
 
         function scaleLocal(box, scale) {
@@ -323,10 +333,10 @@
         }
 
         var onProgress = function(xhr) {
-            if (xhr.lengthComputable) {
-                var percentComplete = xhr.loaded / xhr.total * 100;
-                console.log(Math.round(percentComplete, 2) + '% downloaded');
-            }
+            // if (xhr.lengthComputable) {
+            //     var percentComplete = xhr.loaded / xhr.total * 100;
+            //     console.log(Math.round(percentComplete, 2) + '% downloaded');
+            // }
         };
 
         var onError = function(xhr) {};

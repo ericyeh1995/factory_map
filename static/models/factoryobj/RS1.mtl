@@ -1,0 +1,9 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl RS1:color:139:45:45
+Kd 0.545098 0.176471 0.176471
+Ks 0 0 0
+
+newmtl RS1:color:255:238:34
+Kd 1 0.933333 0.133333
+Ks 0 0 0

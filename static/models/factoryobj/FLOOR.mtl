@@ -1,0 +1,21 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl floor-try:color:73:169:83
+Kd 0.818189 0.818189 0.613642
+Ks 0 0 0
+
+newmtl floor-try:color:255:238:34
+Kd 0.898985 0.897292 0.878553
+Ks 0 0 0
+
+newmtl floor-try:color:1:61:210
+Kd 0.00392157 0.239216 0.823529
+Ks 0 0 0
+
+newmtl floor-try:color:255:237:33
+Kd 1 0.929412 0.129412
+Ks 0 0 0
+
+newmtl floor-try:color:164:157:153
+Kd 0.819608 0.819608 0.611765
+Ks 0 0 0
