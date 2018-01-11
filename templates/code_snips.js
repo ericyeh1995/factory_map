@@ -80,22 +80,59 @@ scene.add( mesh );
 
 
             // INTERACTIVE: INTERSECTIONS
+            // Assuming emissive hex = 0
             raycaster.setFromCamera(mouse, camera);
             var intersects = raycaster.intersectObjects(interactive_objects);
             if (intersects.length > 0) {
                 if (INTERSECTED != intersects[0].object) {
                     console.log('intersect change');
-                    if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
+                    if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(0);
                     INTERSECTED = intersects[0].object;
-                    INTERSECTED.currentHex = INTERSECTED.material[0].emissive.getHex();
                     INTERSECTED.material[0].emissive.setHex(0xff3010);
                 }
             } else {
-                if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(INTERSECTED.currentHex);
+                if (INTERSECTED) INTERSECTED.material[0].emissive.setHex(0);
                 INTERSECTED = null;
             }
 
 
 
 
+
+            // INTERACTIVE: INTERSECTIONS
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(interactive_objects);
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    console.log('intersect change');
+                    if (INTERSECTED) INTERSECTED.scale.set(1,1,1);
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.scale.set(1.05,1.05,1.05);
+                }
+            } else {
+                if (INTERSECTED) INTERSECTED.scale.set(1,1,1);
+                INTERSECTED = null;
+            }
+
+
+
+                        var box = new THREE.BoxHelper( obj_mesh, 0xffff00 );
+                        scene.add( box );
+
+
+
+
+
+
+
+            // GEOMETRY
+            // var box = new THREE.BoxGeometry(500, 500, 500);
+            // var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
+            // var mesh = new THREE.Mesh(box, box_mat);
+            // mesh.castShadow = true;
+            // mesh.selectable = true;
+            // mesh.position.set(0, 500, 0);
+            // mesh.name = 'box'
+            // scene.add(mesh);
+            // makeInteractive(mesh);
 

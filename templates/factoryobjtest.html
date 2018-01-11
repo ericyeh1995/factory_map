@@ -14,13 +14,13 @@
          overflow: hidden;
      }
      #info {
-         color: #fff;
-         position: absolute;
-         top: 10px;
-         width: 100%;
-         text-align: center;
-         z-index: 100;
-         display:block;
+        position: absolute;
+        top: 0px; width: 100%;
+        color: #ffffff;
+        padding: 5px;
+        font-family: Monospace;
+        font-size: 13px;
+        text-align: center;
      }
      #info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
     </style>
@@ -44,6 +44,8 @@
         <script type="text/javascript" src="../static/Detector.js"></script>
         <script type="text/javascript" src="../static/stats.min.js"></script>
 
+        <script type="text/javascript" src="../static/dat.gui.js"></script>
+
     <script>
         var machine_text = {
             "machine_01": {
@@ -66,17 +68,33 @@
             mouseY = 0;
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
-        var pointLight, spotLight, spotLight2;
+        var ambientLight, pointLight, spotLight, spotLight2;
 
         var raycaster;
         var mouse = new THREE.Vector2(), INTERSECTED;
         var interactive_objects = [];
 
+        var gui;
 
         init();
         animate();
 
         function init() {
+
+            // RENDERER
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
+
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
             // SCENE
             scene = new THREE.Scene();
@@ -89,24 +107,23 @@
             camera.position.x = 17000;
             scene.add(camera);
 
-            controls = new THREE.OrbitControls(camera);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.minDistance = 1000;
             controls.maxDistance = 100000;
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2 + 0.1;
+            controls.update();
 
             // LIGHT
-            var ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
 
-            spotLight = new THREE.SpotLight({
-                color: 0xffffff,
-                intensity: 1,
-                angle: 0.5,
-                penumbra: 0.3,
-                decay: 1
-            }); //TODO: fix here
-            spotLight.distance = 60000;
+            spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.distance = 120000;
+            spotLight.intensity = 1;
+            spotLight.angle = 0.5;
+            spotLight.penumbra = 0.3;
+            spotLight.decay = 1;
             spotLight.castShadow = true;
             spotLight.shadow.camera.near = 1;
             spotLight.shadow.camera.far = 5;
@@ -192,21 +209,6 @@
             raycaster = new THREE.Raycaster();
             document.addEventListener('mousemove', onDocumentMouseMove, false);
 
-            // RENDERER
-            container = document.createElement('div');
-            document.body.appendChild(container);
-
-            renderer = new THREE.WebGLRenderer();
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-
-            renderer.gammaInput = true;
-            renderer.gammaOutput = true;
-
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
             // TEXT RENDERER
             labelRenderer = new THREE.CSS2DRenderer();
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -218,11 +220,20 @@
             // WINDOW        
             window.addEventListener('resize', onWindowResize, false);
 
+            // GUI
+            buildGui();
+
             // STATS
             stats = new Stats();
             container.appendChild(stats.dom);
 
         } // end init
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+            stats.update();
+        }
 
         function render() {
 
@@ -247,19 +258,15 @@
             // camera.lookAt( cameraTarget );
 
             // NORMAL RENDER STUFF
-            controls.update();
+            spotLightHelper.update();
+            
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
 
 
-        // HELPER FUNCTIONS
-        function animate() {
-            requestAnimationFrame(animate);
-            render();
-            stats.update();
-        }
 
+        // HELPER FUNCTIONS
         function makeInteractive(mesh){ 
 
             // add variable for scaling
@@ -286,7 +293,7 @@
                 wireframe: true,
                 transparent: true,
                 opacity: 0.3,
-                visible: false // <- SETTING
+                visible: true // <- SETTING
             }));
             selectable.position.set(
                 mesh.center.x + mesh.position.x,
@@ -341,7 +348,35 @@
 
         var onError = function(xhr) {};
 
+        // GUI
+        function buildGui() {
 
+                gui = new dat.GUI();
+
+                var params = {
+                    'light color': spotLight.color.getHex(),
+                    intensity: spotLight.intensity,
+                    distance: spotLight.distance,
+                    angle: spotLight.angle,
+                    penumbra: spotLight.penumbra,
+                    decay: spotLight.decay,
+                    x: spotLight.position.x,
+                    y: spotLight.position.y,
+                    z: spotLight.position.z
+                }
+
+                var spotLightFolder = gui.addFolder( 'Spotlight' );
+                spotLightFolder.addColor( params, 'light color' ).onChange(function(val){ spotLight.color.setHex(val); });
+                spotLightFolder.add( params, 'intensity', 0, 2 ).onChange(function(val){ spotLight.intensity = val; });
+                spotLightFolder.add( params, 'distance', 50, 120000 ).onChange(function(val){ spotLight.distance = val; });
+                spotLightFolder.add( params, 'angle', 0, Math.PI / 3 ).onChange(function(val){ spotLight.angle = val; });
+                spotLightFolder.add( params, 'penumbra', 0, 1 ).onChange(function(val){ spotLight.penumbra = val; });
+                spotLightFolder.add( params, 'decay', 1, 2 ).onChange(function(val){ spotLight.decay = val; });
+                spotLightFolder.add( params, 'x', -20000, 20000 ).onChange(function(val){ spotLight.position.x = val; });
+                spotLightFolder.add( params, 'y', 0, 35000 ).onChange(function(val){ spotLight.position.y = val; });
+                spotLightFolder.add( params, 'z', -20000, 20000 ).onChange(function(val){ spotLight.position.z = val; });
+                spotLightFolder.open();
+            }
 
     </script>
 
