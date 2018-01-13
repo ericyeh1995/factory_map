@@ -69,6 +69,7 @@
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
         var ambientLight, pointLight, spotLight, spotLight2;
+        var floor;
 
         var raycaster;
         var mouse = new THREE.Vector2(), INTERSECTED;
@@ -119,9 +120,9 @@
             scene.add(ambientLight);
 
             spotLight = new THREE.SpotLight(0xffffff);
-            spotLight.distance = 120000;
+            spotLight.distance = 80000;
             spotLight.intensity = 1;
-            spotLight.angle = 0.5;
+            spotLight.angle = 0.65;
             spotLight.penumbra = 0.3;
             spotLight.decay = 1;
             spotLight.castShadow = true;
@@ -134,8 +135,8 @@
             scene.add(spotLightHelper);
 
             // MODEL
-            modelPath = "../static/models/factoryobj/"
-            modelNames = ['MW8', 'RS11', 'RS4', 'RS7', 'dam', 'RS3', 'RS2', 'RS1', 'B2', 'STR19', 'B3', 'B1', 'Tinning-line', 'str37', 'B5', 'TP1', 'B7', 'RS9', 'RS8', 'B6', 'e5', 'EX6', 'EX7', 'E3', 'e2', 'MW16', 'EX1'];
+            modelPath = "../static/models/factoryobj3/"
+            modelNames = ['MW8', 'RS11', 'RS4', 'RS7', 'DAM', 'RS3', 'RS2', 'RS1', 'B2', 'STR19', 'B3', 'B1', 'TINNING-LINE', 'STR37', 'B5', 'TP1', 'B7', 'RS9', 'RS8', 'B6', 'E5', 'EX6', 'E7', 'E3', 'E2', 'MW16', 'EX1'];
             modelNames.forEach(function(modelName){
 
                 var mtlLoader, objLoader
@@ -152,7 +153,7 @@
                     objLoader.load(modelName+'.obj', function(object) {
 
                         obj_mesh = object.children[0];
-                        obj_mesh.receiveShadow = true;
+                        obj_mesh.receiveShadow = false;
                         obj_mesh.castShadow = true;
                         obj_mesh.position.set(0, 0, 0);
                         obj_mesh.name = modelName;
@@ -166,32 +167,21 @@
             });
 
 
-            // GEOMETRY
-            // var box = new THREE.BoxGeometry(500, 500, 500);
-            // var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
-            // var mesh = new THREE.Mesh(box, box_mat);
-            // mesh.castShadow = true;
-            // mesh.selectable = true;
-            // mesh.position.set(0, 500, 0);
-            // mesh.name = 'box'
-            // scene.add(mesh);
-            // makeInteractive(mesh);
-
             // FLOOR
-            var floor = new THREE.BoxGeometry(50000, 10, 50000);
+            var floor_geo = new THREE.BoxGeometry(50000, 10, 50000);
             var floor_mat = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 //emissive: 0x191919
                 metalness: 0,
-                //opacity: 0.5,
-                //transparent: true
+                opacity: 0.5,
+                transparent: false
             });
             floor_mat.roughness = 1;
-            var mesh = new THREE.Mesh(floor, floor_mat);
-            mesh.position.set(0, -50, 0);
-            mesh.receiveShadow = true;
-            mesh.name = 'floor'
-            scene.add(mesh);
+            floor = new THREE.Mesh(floor_geo, floor_mat);
+            floor.position.set(0, -5, 0);
+            floor.receiveShadow = true;
+            floor.name = 'floor'
+            scene.add(floor);
 
             // TEXT
             var texts = ["machine_01"]
@@ -226,7 +216,6 @@
             // STATS
             stats = new Stats();
             container.appendChild(stats.dom);
-
         } // end init
 
         function animate() {
@@ -354,28 +343,43 @@
                 gui = new dat.GUI();
 
                 var params = {
-                    'light color': spotLight.color.getHex(),
-                    intensity: spotLight.intensity,
-                    distance: spotLight.distance,
-                    angle: spotLight.angle,
-                    penumbra: spotLight.penumbra,
-                    decay: spotLight.decay,
-                    x: spotLight.position.x,
-                    y: spotLight.position.y,
-                    z: spotLight.position.z
+                    'background': scene.background.getHex(),
+
+                    'ambient color': ambientLight.color.getHex(),
+
+                    'spotlight color': spotLight.color.getHex(),
+
+                    'floor color': floor.material.color.getHex(),
+                    'floor emissive': floor.material.emissive.getHex()
                 }
 
+                var sceneFolder = gui.addFolder('Scene');
+                sceneFolder.addColor( params, 'background' ).onChange(function(val){ scene.background.setHex(val) });
+
+                var ambientLightFolder = gui.addFolder( 'AmbientLight' );
+                ambientLightFolder.addColor( params, 'ambient color' ).onChange(function(val){ ambientLight.color.setHex(val); });
+                ambientLightFolder.add( ambientLight, 'intensity', 0, 2 );
+
+
                 var spotLightFolder = gui.addFolder( 'Spotlight' );
-                spotLightFolder.addColor( params, 'light color' ).onChange(function(val){ spotLight.color.setHex(val); });
-                spotLightFolder.add( params, 'intensity', 0, 2 ).onChange(function(val){ spotLight.intensity = val; });
-                spotLightFolder.add( params, 'distance', 50, 120000 ).onChange(function(val){ spotLight.distance = val; });
-                spotLightFolder.add( params, 'angle', 0, Math.PI / 3 ).onChange(function(val){ spotLight.angle = val; });
-                spotLightFolder.add( params, 'penumbra', 0, 1 ).onChange(function(val){ spotLight.penumbra = val; });
-                spotLightFolder.add( params, 'decay', 1, 2 ).onChange(function(val){ spotLight.decay = val; });
-                spotLightFolder.add( params, 'x', -20000, 20000 ).onChange(function(val){ spotLight.position.x = val; });
-                spotLightFolder.add( params, 'y', 0, 35000 ).onChange(function(val){ spotLight.position.y = val; });
-                spotLightFolder.add( params, 'z', -20000, 20000 ).onChange(function(val){ spotLight.position.z = val; });
-                spotLightFolder.open();
+                spotLightFolder.addColor( params, 'spotlight color' ).onChange(function(val){ spotLight.color.setHex(val); });
+                spotLightFolder.add( spotLight, 'intensity', 0, 2 );
+                spotLightFolder.add( spotLight, 'distance', 50, 120000 );
+                spotLightFolder.add( spotLight, 'angle', 0, Math.PI / 3 );
+                spotLightFolder.add( spotLight, 'penumbra', 0, 1 );
+                spotLightFolder.add( spotLight, 'decay', 0, 2 );
+                spotLightFolder.add( spotLight.position, 'x', -20000, 20000 );
+                spotLightFolder.add( spotLight.position, 'y', 0, 50000 );
+                spotLightFolder.add( spotLight.position, 'z', -20000, 20000 );
+
+                var floorFolder = gui.addFolder( 'Floor Material' );
+                floorFolder.add( floor.material, 'transparent');
+                floorFolder.add( floor.material, 'opacity', 0, 1);
+                floorFolder.addColor( params, 'floor color').onChange(function(val){ floor.material.color.setHex(val) });
+                floorFolder.addColor( params, 'floor emissive').onChange(function(val){ floor.material.emissive.setHex(val) });
+                floorFolder.add( floor.material, 'roughness', 0, 1);
+                floorFolder.add( floor.material, 'metalness', 0, 1);
+
             }
 
     </script>
