@@ -99,7 +99,7 @@
 
             // SCENE
             scene = new THREE.Scene();
-            scene.background = new THREE.Color( 0x808080 );
+            scene.background = new THREE.Color( 0xbebebe );
 
             // CAMERA AND CONTROL
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
@@ -116,7 +116,7 @@
             controls.update();
 
             // LIGHT
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
             spotLight = new THREE.SpotLight(0xffffff);
@@ -168,9 +168,9 @@
 
 
             // FLOOR
-            var floor_geo = new THREE.BoxGeometry(50000, 10, 50000);
+            var floor_geo = new THREE.BoxGeometry(100000, 10, 100000);
             var floor_mat = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
+                color: 0xc8c8c8,
                 //emissive: 0x191919
                 metalness: 0,
                 opacity: 0.5,
@@ -184,7 +184,7 @@
             scene.add(floor);
 
             // TEXT
-            var texts = ["machine_01"]
+            var texts = ["machine_05", "machine_04"]
 
             var text = document.createElement('div');
             text.className = 'label';
@@ -281,7 +281,7 @@
                 color: 0x801010,
                 wireframe: true,
                 transparent: true,
-                opacity: 0.3,
+                opacity: 0.1,
                 visible: true // <- SETTING
             }));
             selectable.position.set(
@@ -292,11 +292,11 @@
             selectable.name = mesh.name+'-box';
             scene.add(selectable);
             interactive_objects.push(selectable);
-        };
+        }
 
-        var onDeselect = function(mesh) { scaleLocal(mesh, 1); }
+        var onDeselect = function(mesh) { scaleLocal(mesh, 1); };
 
-        var onSelect = function(mesh) { scaleLocal(mesh, 1.1); }
+        var onSelect = function(mesh) { scaleLocal(mesh, 1.1); };
 
         function scaleLocal(box, scale) {
             // since the origin of the object is at global origin, we need 
@@ -336,6 +336,7 @@
         };
 
         var onError = function(xhr) {};
+
 
         // GUI
         function buildGui() {
@@ -379,8 +380,7 @@
                 floorFolder.addColor( params, 'floor emissive').onChange(function(val){ floor.material.emissive.setHex(val) });
                 floorFolder.add( floor.material, 'roughness', 0, 1);
                 floorFolder.add( floor.material, 'metalness', 0, 1);
-
-            }
+        }
 
     </script>
 
