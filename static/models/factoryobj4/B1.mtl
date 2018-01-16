@@ -1,0 +1,9 @@
+# OBJ Material Export by Luxion KeyShot
+
+newmtl B1:color:255:238:34 #2
+Kd 0.669779 0.864897 0.767483
+Ks 0 0 0
+
+newmtl Paint Gloss Yellow #5
+Kd 0.559503 0.774395 0.673381
+Ks 0 0 0

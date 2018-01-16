@@ -46,6 +46,7 @@
 
         <script type="text/javascript" src="../static/dat.gui.js"></script>
 
+
     <script>
         var machine_text = {
             "machine_01": {
@@ -76,6 +77,8 @@
         var interactive_objects = [];
 
         var gui;
+
+        var outScene;
 
         init();
         animate();
@@ -112,7 +115,7 @@
             controls.minDistance = 1000;
             controls.maxDistance = 100000;
             controls.enablePan = true;
-            controls.maxPolarAngle = Math.PI / 2 + 0.1;
+            controls.maxPolarAngle = Math.PI / 2;
             controls.update();
 
             // LIGHT
@@ -134,9 +137,23 @@
             spotLightHelper = new THREE.SpotLightHelper(spotLight);
             scene.add(spotLightHelper);
 
+
+            // SHADER
+            // outScene = new THREE.Scene();
+            // shader = {
+            //   'outline': {
+            //     vertex_shader: ["uniform float offset;", "void main() {", "vec4 pos = modelViewMatrix * vec4( position + normal * offset, 1.0 );", "gl_Position = projectionMatrix * pos;", "}"].join("\n"),
+            //     fragment_shader: ["void main(){", "gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );", "}"].join("\n")
+            // }};
+
             // MODEL
-            modelPath = "../static/models/factoryobj3/"
-            modelNames = ['MW8', 'RS11', 'RS4', 'RS7', 'DAM', 'RS3', 'RS2', 'RS1', 'B2', 'STR19', 'B3', 'B1', 'TINNING-LINE', 'STR37', 'B5', 'TP1', 'B7', 'RS9', 'RS8', 'B6', 'E5', 'EX6', 'E7', 'E3', 'E2', 'MW16', 'EX1'];
+            // Model saved that the box is the root, ex:
+            // RS4-box: box for selection, box geometry, transparent material
+            // RS4-box.object: imported mesh, shape of machines, material defined in keyshot rendering program
+
+            modelPath = "../static/models/factoryobj4/"
+            modelNames = ['MW8', 'RS11', 'PO', 'RS4', 'RS7', 'DAM', 'RS3', 'RS2', 'RS1', 'B2', 'STR19', 'B3', 'B1', 'Tinning-line', 'STR37', 'B5', 'TP1', 'B7', 'RS9', 'RS8', 'B6', 'E5', 'E6', 'E7', 'E3', 'building', 'E2', 'MW16', 'E1'];
+
             modelNames.forEach(function(modelName){
 
                 var mtlLoader, objLoader
@@ -158,7 +175,27 @@
                         obj_mesh.position.set(0, 0, 0);
                         obj_mesh.name = modelName;
                         
-                        makeInteractive(obj_mesh);
+                        if (modelName != 'building') {
+                            makeInteractive(obj_mesh)
+                        } else {
+                            obj_mesh.receiveShadow = true;
+                        }
+
+
+                        // var scale = 1.1;
+
+                        // var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
+                        // var outlineMesh1 = new THREE.Mesh( obj_mesh.geometry, outlineMaterial1 );
+
+                        // var xSet = obj_mesh.center.x * (1 - scale) + obj_mesh.position.orig.x;
+                        // var ySet = obj_mesh.center.y * (1 - scale) + obj_mesh.position.orig.y;
+                        // var zSet = obj_mesh.center.z * (1 - scale) + obj_mesh.position.orig.z;
+
+                        // outlineMesh1.position.set(xSet, ySet, zSet);
+                        // outlineMesh1.scale.multiplyScalar(scale);
+                        // scene.add( outlineMesh1 );
+
+                        // var eh = new THREE.EdgesHelper( obj_mesh, 0xff0000 ); scene.add( eh );
 
                         scene.add(obj_mesh);
                         console.log('OBJ file loaded: '+modelPath+modelName);
@@ -166,7 +203,7 @@
                 });
             });
 
-
+            
             // FLOOR
             var floor_geo = new THREE.BoxGeometry(100000, 10, 100000);
             var floor_mat = new THREE.MeshStandardMaterial({
@@ -194,6 +231,44 @@
             var label = new THREE.CSS2DObject(text);
             label.position.set(2500, 500, 2800);
             scene.add(label);
+
+            //GEOMETRY
+            var box = new THREE.BoxGeometry(1000, 1000, 1000);
+            var box_mat = new THREE.MeshStandardMaterial({ color: 0x2194ce });
+            var boxMesh = new THREE.Mesh(box, box_mat);
+            boxMesh.castShadow = true;
+            boxMesh.selectable = true;
+            boxMesh.position.set(0, 3000, 0);
+            boxMesh.name = 'box'
+            scene.add(boxMesh);
+            makeInteractive(boxMesh);
+
+            //// scale to add outline
+            // var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
+            // var outlineMesh1 = new THREE.Mesh( box, outlineMaterial1 );
+            // outlineMesh1.position.copy(boxMesh.position);
+            // outlineMesh1.scale.multiplyScalar(1.2);
+            // scene.add( outlineMesh1 );
+
+
+
+              // uniforms = {
+              //   offset: {
+              //     type: "f",
+              //     value: 1
+              //   }
+              // };
+              // outShader = shader['outline'];
+              // matShader = new THREE.ShaderMaterial({
+              //   uniforms: uniforms,
+              //   vertexShader: outShader.vertex_shader,
+              //   fragmentShader: outShader.fragment_shader
+              // });
+              // mesh3 = new THREE.Mesh(box, matShader);
+              // mesh3.material.depthWrite = false;
+              // mesh3.quaternion = boxMesh.quaternion;
+              // outScene.add(mesh3);
+
 
             // INTERACTIVE
             raycaster = new THREE.Raycaster();
@@ -250,6 +325,7 @@
             spotLightHelper.update();
             
             renderer.render(scene, camera);
+            // renderer.render( outScene, camera )
             labelRenderer.render(scene, camera);
         }
 
@@ -281,7 +357,7 @@
                 color: 0x801010,
                 wireframe: true,
                 transparent: true,
-                opacity: 0.1,
+                opacity: 0.2,
                 visible: true // <- SETTING
             }));
             selectable.position.set(

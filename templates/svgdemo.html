@@ -1,0 +1,220 @@
+<html>
+    <head>
+	<title>SVG demo 1</title>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    
+    <body>
+
+	<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1028 720">
+	    <defs>
+		<style>
+		 .cls-1{font-size:25.3px;}
+		 .cls-1,.cls-10,.cls-11,.cls-15,.cls-16,.cls-2,.cls-3,.cls-5,.cls-8,.cls-9{fill:#ffffff;}.cls-1,.cls-10,.cls-11,.cls-15,.cls-16,.cls-18,.cls-2,.cls-5,.cls-8,.cls-9{font-family:ArialMT, Arial;}.cls-2{font-size:50.59px;}.cls-13,.cls-14,.cls-4,.cls-7{fill:none;}.cls-4,.cls-7{stroke:#fff;}.cls-13,.cls-4,.cls-7{stroke-miterlimit:10;}.cls-13,.cls-4{stroke-width:3px;}.cls-5{font-size:13.47px;}.cls-6{letter-spacing:-0.07em;}.cls-8{font-size:28px;}.cls-9{font-size:31.15px;}.cls-10{font-size:20.81px;}.cls-11{font-size:14px;}.cls-12{letter-spacing:-0.11em;}.cls-13{stroke:#8e8e8e;}.cls-14{stroke:#65beea;stroke-linejoin:bevel;stroke-width:7px;stroke-dasharray:125 1000;}.cls-15{font-size:40.98px;}.cls-16{font-size:30.3px;}.cls-17{fill:#60bc50;}.cls-18{font-size:20.3px;}.cls-19{fill:#33ce18;}
+		</style>
+	    </defs>
+
+	    <title>Epson glass02</title>
+	    <!-- <g><rect width="1028" height="720" style="fill:#000fff"/></g> -->
+	    <g id="data">
+		<text class="cls-1" transform="translate(949 78)">times</text>
+		<text class="cls-2" transform="translate(876.56 77.57)" id="spark">--</text>
+		<g id="spark_icon" class="sparkglow">
+		    <path class="cls-3 spark" d="M840.79,35.6A21.75,21.75,0,1,1,819,57.35,21.77,21.77,0,0,1,840.79,35.6m0-1a22.75,22.75,0,1,0,22.75,22.75A22.75,22.75,0,0,0,840.79,34.6Z"/>
+		    <path class="cls-3 spark" d="M848,39.44c-.14.23-.27.47-.41.7l-5.31,8.19a2.2,2.2,0,0,0-.32.55c-.16.58.23.65.66.64l4.69,0a4,4,0,0,1,.89.07c.54.12.69.47.42,1a2.83,2.83,0,0,1-.47.6L835.44,63.83a.65.65,0,0,1-.4.2c.14-.23.27-.46.42-.68l5-7.76c.12-.18.24-.36.34-.55.45-.85.14-1.46-.82-1.5-1.11,0-2.23,0-3.34,0a9.67,9.67,0,0,1-1.53-.1c-.55-.09-.7-.47-.4-.95a4.06,4.06,0,0,1,.58-.68L847.19,40c.22-.22.47-.43.71-.64Z"/>
+		    <polyline class="cls-4 sparkPolyline" points="820.89 65.43 833.22 65.43 835.38 67.6 838.17 65.43 859.28 65.43"/>
+		</g>
+		<text class="cls-5 spark" transform="translate(818.46 24.12)">SPARK</text>
+		<line id="line" class="cls-7" x1="797" y1="36.5" x2="797" y2="80"/>
+		<text class="cls-1" transform="translate(716.25 77.57)">mpm</text>
+		<text class="cls-8" transform="translate(666.77 77.37)">500</text>
+		<line id="slash" class="cls-7" x1="666" y1="54" x2="643" y2="77"/>
+		<text class="cls-2" transform="translate(542.4 77.57)" id="speed">---</text>
+		<g id="speed_icon">
+		    <path id="speedPtr" class="cls-3" d="M491.69,65.84a2.25,2.25,0,0,0,0-4.51l-10.21-7.51,8,9.9A2.26,2.26,0,0,0,491.69,65.84Z"/>
+		    <path class="cls-3" d="M510.23,45a27.59,27.59,0,0,0-43.64,32.88h5.16l3.77-2.18-1.67-2.88L469,75.57a24.26,24.26,0,0,1-2.68-11.11c0-.71,0-1.41.09-2.1l5.78,1,.58-3.28-5.85-1a24.4,24.4,0,0,1,6.66-12l4,4.72,2.55-2.14-4-4.76a24.27,24.27,0,0,1,13-4.82v6.32h3.33V40.11a24.27,24.27,0,0,1,13,4.82l-4,4.76,2.55,2.14,4-4.72a24.4,24.4,0,0,1,6.66,12l-5.85,1,.58,3.28,5.78-1c.06.69.09,1.39.09,2.1a24.25,24.25,0,0,1-2.68,11.11l-4.85-2.8-1.67,2.88,3.77,2.18h5.16A27.61,27.61,0,0,0,510.23,45Z"/>
+		</g>
+		<text class="cls-5" transform="translate(467.12 24.12)">SPEED</text>
+		<text class="cls-9" transform="translate(56.03 453.83)" id="timeLeft">23:59:59</text>
+		<text class="cls-10" transform="translate(85.74 335.81)">Length</text>
+		<text class="cls-11" transform="translate(210.7 463.81)">Current</text>
+		<text class="cls-11" transform="translate(210.7 510.81)">
+		    <tspan class="cls-12">Target</tspan>
+		</text>
+		<text class="cls-10" transform="translate(98.68 481.81)">Left</text>
+		<circle class="cls-13" cx="116.65" cy="445.53" r="82.16"/>
+		<text class="cls-1" transform="translate(383.9 516.45)">m</text>
+		<text class="cls-15" transform="translate(270.74 469.61)" id="curLen">------</text>
+		<text class="cls-16" transform="translate(278.21 516.16)" id="tarLen">------</text>
+		<rect class="cls-17" x="31" y="26" width="115" height="37" rx="7" ry="7" id="lineid"/>
+		<text class="cls-18" transform="translate(45 51.41)">EX-LINE1</text>
+		<!--     <circle class="cls-19" cx="491.7" cy="63.6" r="0.5"/>儀表針圓心 -->
+		<!--     <circle class="cls-20" cx="116.94" cy="595.85" r="0.5"/>長度表圓心 -->
+
+	    </g>
+	</svg>
+
+
+
+
+	<!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+	<script src="{{ url_for('static', filename='d3.min.js') }}"></script>
+	<script>
+	 /* var num = 5.1234
+	    alert("test toFixed: " + ("00" + num.toFixed()).slice(-2));*/
+
+	 
+	 var TAU = 2 * Math.PI;
+
+	 
+	 var updateInt = 1000;
+	 /* var speedX = 5000;
+	    var tarLen = 200000;
+	    var defaultStartLen = 0;*/
+	 var speedX = 1;
+	 var tarLen = 260;
+	 var defaultStartLen = 200;
+	 
+	 var curSpeed = 250;
+	 var maxSpeed = 500;
+	 var avgSpeed = curSpeed;
+	 var curLen = defaultStartLen;
+	 var spark = 2;
+	 var prevSpark = spark;
+	 var timeLeft = '23:59:59';
+	 var totSecLeft = 0;
+	 
+	 
+	 function updateState() {
+
+	     curSpeed += 5;
+	     curLen += speedX * curSpeed / 60;
+	     curSpeed >= 300 ? curSpeed = 200 :0;
+	     curLen >= tarLen ? (curLen = defaultStartLen, spark = 0) :0;
+	     curLen >= tarLen ? spark = 0 :0;
+	     Math.random() < 1/5 ? spark += 1 :0;
+	     
+	     avgSpeed = avgSpeed * 0.95 + curSpeed * 0.05;
+	     totSecLeft = Math.ceil((tarLen - curLen) / avgSpeed * 60);
+	     var secLeft = totSecLeft % 60;
+	     var minLeft = totSecLeft/60 % 60;
+	     var hrLeft = totSecLeft/3600;
+
+	     
+	     timeLeft = ("00" + hrLeft.toFixed()).slice(-2) + ':' +
+			 ("00" + minLeft.toFixed()).slice(-2) + ':' +
+			 ("00" + secLeft.toFixed()).slice(-2)
+	 }
+
+
+	 // glowing effect
+	 var g2 = d3.select("g")
+	 //Container for the gradients
+	 var defs = g2.append("defs");
+	 //Filter for the outside glow
+	 var filter = defs.append("filter")
+			  .attr("id","glow");
+	 filter.append("feGaussianBlur")
+	       .attr("stdDeviation","0")
+	       .attr("result","coloredBlur");
+	 var feMerge = filter.append("feMerge");
+	 feMerge.append("feMergeNode")
+		.attr("id","coloredBlur");
+	 feMerge.append("feMergeNode")
+		.attr("in","SourceGraphic");
+
+
+	 d3.selectAll(".spark")
+	   .style("filter", "url(#glow)");
+
+	 
+	 // arctween
+	 var g = d3.select("g")
+		   .append("g")
+		   .attr("transform", "translate("+116.94+","+445.85+")");
+	 var arc = d3.arc()
+		     .innerRadius(78)
+		     .outerRadius(86)
+		     .startAngle(0);
+	 var progBar = g.append("path")
+			.datum({endAngle: 0})
+			.style("fill", "lightskyblue")
+			.attr("d", arc);
+	 function arcTween(newAngle) {
+	     return function(d) {
+		 var interpolate = d3.interpolate(d.endAngle, newAngle);
+		 return function(t) {
+		     d.endAngle = interpolate(t)
+		     return arc(d);
+		 };
+	     };
+	 }
+
+	 
+	 // meter
+	 /* min angle: -75
+	    max angle: 170 */
+	 var prevAngle = -75
+	 var speedPtr = d3.select('#speedPtr').attr('transform', 'rotate(-75, 491.7, 63.6)');
+	 function angTween(newData) {
+	     return function(d) {
+		 var intAng = d3.interpolate(-75, 170);
+		 var newAngle = intAng(newData);
+		 var interpolate = d3.interpolate(prevAngle, newAngle);
+		 prevAngle = newAngle;
+		 return function(t) {
+		     return "rotate(" + interpolate(t) + ", 491.7, 63.6)";
+		 };
+	     };
+	 }
+
+
+	 setInterval(function() {
+	     updateState();
+
+	     progBar.transition()
+		    .duration(1000)
+		    .attrTween("d", arcTween(curLen/tarLen * TAU));
+	     speedPtr.transition()
+		     .duration(300)
+		     .attrTween("transform", angTween(curSpeed/maxSpeed));
+
+	     if (spark != prevSpark) {
+		 d3.selectAll(".spark")
+		   .transition(500)
+		   .style("fill", "#FFFF00")
+		   .transition(1500).delay(500)
+		   .style("fill", "#FFFFFF");
+
+		 d3.selectAll(".sparkPolyline")
+		   .transition(500)
+		   .style("stroke", "#FFFF00")
+		   .transition(1500).delay(500)
+		   .style("stroke", "#FFFFFF");
+
+		 /* d3.selectAll(".sparkglow")
+		    .transition(500)
+		    .style("filter", "url(#glow)")
+		    .transition(1200).delay(500)
+		    .style("filter", "");*/
+
+		 
+		 filter.select("feGaussianBlur").transition(500)
+		       .attr("stdDeviation", "5")
+		       .transition(1500).delay(500)
+		       .attr("stdDeviation", "0");
+
+		 prevSpark = spark;
+	     }
+	     
+	     document.getElementById("speed").innerHTML = curSpeed.toFixed();
+	     document.getElementById("tarLen").innerHTML = ("000000" + tarLen.toFixed()).slice(6);
+	     document.getElementById("curLen").innerHTML = ("000000" + curLen.toFixed()).slice(6);
+	     document.getElementById("timeLeft").innerHTML = timeLeft;
+	     document.getElementById("spark").innerHTML = spark.toString();
+	 }, updateInt);
+
+	</script>
+
+    </body>
+</html>

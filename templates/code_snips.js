@@ -125,14 +125,14 @@ scene.add( mesh );
 
 
 
-            // GEOMETRY
-            // var box = new THREE.BoxGeometry(500, 500, 500);
-            // var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
-            // var mesh = new THREE.Mesh(box, box_mat);
-            // mesh.castShadow = true;
-            // mesh.selectable = true;
-            // mesh.position.set(0, 500, 0);
-            // mesh.name = 'box'
-            // scene.add(mesh);
-            // makeInteractive(mesh);
+            GEOMETRY
+            var box = new THREE.BoxGeometry(500, 500, 500);
+            var box_mat = new THREE.MeshStandardMaterial(0.1, 0);
+            var mesh = new THREE.Mesh(box, box_mat);
+            mesh.castShadow = true;
+            mesh.selectable = true;
+            mesh.position.set(0, 500, 0);
+            mesh.name = 'box'
+            scene.add(mesh);
+            makeInteractive(mesh);
 
