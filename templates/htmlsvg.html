@@ -143,6 +143,8 @@
 
         var gui;
 
+        var origin;
+
         init();
         animate();
 
@@ -174,9 +176,9 @@
             camera.position.x = 17000;
             scene.add(camera);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls = new THREE.OrbitControls(camera);
             controls.minDistance = 1000;
-            controls.maxDistance = 100000;
+            controls.maxDistance = 16500;
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2;
             controls.update();
@@ -241,7 +243,7 @@
             // FLOOR
             var floor_geo = new THREE.BoxGeometry(100000, 10, 100000);
             var floor_mat = new THREE.MeshStandardMaterial({
-                color: 0xc8c8c8,
+                color: 0x3c3c3c,
                 //emissive: 0x191919
                 metalness: 0,
                 opacity: 0.5,
@@ -265,7 +267,7 @@
             var label = new THREE.CSS2DObject(text);
             label.position.set(2500, 500, 2800);
             scene.add(label);
-
+            
 
             //GEOMETRY
             var box = new THREE.BoxGeometry(1000, 1000, 1000);
@@ -277,34 +279,6 @@
             boxMesh.name = 'box'
             scene.add(boxMesh);
             makeInteractive(boxMesh);
-
-
-            // source: stemkoski
-            // create custom material from the shader code above
-            //   that is within specially labeled script tags
-            var customMaterial = new THREE.ShaderMaterial({
-                uniforms: 
-                { 
-                    "c":   { type: "f", value: 1.0 },
-                    "p":   { type: "f", value: 2.0 },
-                    glowColor: { type: "c", value: new THREE.Color(0xffffff) },
-                    viewVector: { type: "v3", value: camera.position }
-                },
-                vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-                fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-                side: THREE.BackSide,
-                blending: THREE.AdditiveBlending,
-                transparent: true
-            });
-
-            this.boxGlow = new THREE.Mesh( box.clone(), customMaterial.clone() );
-            boxGlow.name = "box-glow"
-            boxGlow.position.copy(boxMesh.position);
-            console.log('boxMesh position: ', boxMesh.position);
-            console.log('boxGlow position: ', boxGlow.position);
-
-            boxGlow.scale.multiplyScalar(1.2);
-            scene.add(boxGlow);
 
 
             // INTERACTIVE
@@ -353,14 +327,10 @@
             }
 
             // CAMERA ROTATE ON START
-            // var timer = Date.now() * 0.0005;
-            // camera.position.x = Math.cos( timer ) * 3;
-            // camera.position.z = Math.sin( timer ) * 3;
-            // camera.lookAt( cameraTarget );
-
-            // GLOW UPDATE
-            boxGlow.material.uniforms.viewVector.value = 
-            new THREE.Vector3().subVectors( camera.position, boxGlow.position );
+            var timer = Date.now() * 0.0005;
+            camera.position.x = Math.cos( timer ) * 17000;
+            camera.position.z = Math.sin( timer ) * 17000;
+            camera.lookAt( scene.position );
 
             // NORMAL RENDER STUFF
             spotLightHelper.update();
@@ -458,6 +428,7 @@
         function buildGui() {
 
                 gui = new dat.GUI();
+                gui.close();
 
                 var params = {
                     'background': scene.background.getHex(),
@@ -655,6 +626,7 @@
          document.getElementById("timeLeft").innerHTML = timeLeft;
          document.getElementById("spark").innerHTML = spark.toString();
      }, updateInt);
+
 
 
 
