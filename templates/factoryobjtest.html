@@ -13,6 +13,9 @@
          margin: 0px;
          overflow: hidden;
      }
+     #data {
+        position: absolute;
+     }
      #info {
         position: absolute;
         top: 0px; width: 100%;
@@ -30,6 +33,19 @@
     <div id="info">
         3D Factory
     </div>
+
+
+    <div id="data">
+            <div>
+                <p> Extruder 2</p>
+            </div>
+        
+            <div>
+                <h2>Speed:  500 mpm</h2>
+                <h2>Length:  8973 m</h2>
+            </div>
+    </div>
+
 
         <script type="text/javascript" src="../static/three.js"></script>
         <script type="text/javascript" src="../static/OrbitControls.js"></script>
@@ -78,7 +94,7 @@
 
         var gui;
 
-        var outScene;
+        var composer;
 
         init();
         animate();
@@ -89,7 +105,7 @@
             container = document.createElement('div');
             document.body.appendChild(container);
 
-            renderer = new THREE.WebGLRenderer();
+            renderer = new THREE.WebGLRenderer( { antialias: false } );
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
@@ -98,7 +114,8 @@
             renderer.gammaOutput = true;
 
             renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.renderReverseSided = false;
+            //renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
             // SCENE
             scene = new THREE.Scene();
@@ -116,6 +133,8 @@
             controls.maxDistance = 100000;
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2;
+            controls.enableDamping = true;
+            controls.dampingFactor = 1;
             controls.update();
 
             // LIGHT
@@ -138,13 +157,6 @@
             scene.add(spotLightHelper);
 
 
-            // SHADER
-            // outScene = new THREE.Scene();
-            // shader = {
-            //   'outline': {
-            //     vertex_shader: ["uniform float offset;", "void main() {", "vec4 pos = modelViewMatrix * vec4( position + normal * offset, 1.0 );", "gl_Position = projectionMatrix * pos;", "}"].join("\n"),
-            //     fragment_shader: ["void main(){", "gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );", "}"].join("\n")
-            // }};
 
             // MODEL
             // Model saved that the box is the root, ex:
@@ -170,7 +182,7 @@
                     objLoader.load(modelName+'.obj', function(object) {
 
                         obj_mesh = object.children[0];
-                        obj_mesh.receiveShadow = false;
+                        obj_mesh.receiveShadow = true;
                         obj_mesh.castShadow = true;
                         obj_mesh.position.set(0, 0, 0);
                         obj_mesh.name = modelName;
@@ -180,22 +192,6 @@
                         } else {
                             obj_mesh.receiveShadow = true;
                         }
-
-
-                        // var scale = 1.1;
-
-                        // var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
-                        // var outlineMesh1 = new THREE.Mesh( obj_mesh.geometry, outlineMaterial1 );
-
-                        // var xSet = obj_mesh.center.x * (1 - scale) + obj_mesh.position.orig.x;
-                        // var ySet = obj_mesh.center.y * (1 - scale) + obj_mesh.position.orig.y;
-                        // var zSet = obj_mesh.center.z * (1 - scale) + obj_mesh.position.orig.z;
-
-                        // outlineMesh1.position.set(xSet, ySet, zSet);
-                        // outlineMesh1.scale.multiplyScalar(scale);
-                        // scene.add( outlineMesh1 );
-
-                        // var eh = new THREE.EdgesHelper( obj_mesh, 0xff0000 ); scene.add( eh );
 
                         scene.add(obj_mesh);
                         console.log('OBJ file loaded: '+modelPath+modelName);
@@ -243,31 +239,11 @@
             scene.add(boxMesh);
             makeInteractive(boxMesh);
 
-            //// scale to add outline
-            // var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
-            // var outlineMesh1 = new THREE.Mesh( box, outlineMaterial1 );
-            // outlineMesh1.position.copy(boxMesh.position);
-            // outlineMesh1.scale.multiplyScalar(1.2);
-            // scene.add( outlineMesh1 );
 
-
-
-              // uniforms = {
-              //   offset: {
-              //     type: "f",
-              //     value: 1
-              //   }
-              // };
-              // outShader = shader['outline'];
-              // matShader = new THREE.ShaderMaterial({
-              //   uniforms: uniforms,
-              //   vertexShader: outShader.vertex_shader,
-              //   fragmentShader: outShader.fragment_shader
-              // });
-              // mesh3 = new THREE.Mesh(box, matShader);
-              // mesh3.material.depthWrite = false;
-              // mesh3.quaternion = boxMesh.quaternion;
-              // outScene.add(mesh3);
+            // POSTPROCESSING
+            // composer = new THREE.EffectComposer( renderer );
+            // var renderPass = new THREE.RenderPass( scene, camera );
+            // composer.addPass( renderPass );
 
 
             // INTERACTIVE

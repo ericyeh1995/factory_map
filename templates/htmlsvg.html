@@ -6,7 +6,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-
+    <style>
+    svg { position: absolute; }
+    </style>
     </head>
 
     <body>
@@ -15,13 +17,14 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1028 720">
         <defs>
         <style>
+
          .cls-1{font-size:25.3px;}
          .cls-1,.cls-10,.cls-11,.cls-15,.cls-16,.cls-2,.cls-3,.cls-5,.cls-8,.cls-9{fill:#ffffff;}.cls-1,.cls-10,.cls-11,.cls-15,.cls-16,.cls-18,.cls-2,.cls-5,.cls-8,.cls-9{font-family:ArialMT, Arial;}.cls-2{font-size:50.59px;}.cls-13,.cls-14,.cls-4,.cls-7{fill:none;}.cls-4,.cls-7{stroke:#fff;}.cls-13,.cls-4,.cls-7{stroke-miterlimit:10;}.cls-13,.cls-4{stroke-width:3px;}.cls-5{font-size:13.47px;}.cls-6{letter-spacing:-0.07em;}.cls-8{font-size:28px;}.cls-9{font-size:31.15px;}.cls-10{font-size:20.81px;}.cls-11{font-size:14px;}.cls-12{letter-spacing:-0.11em;}.cls-13{stroke:#8e8e8e;}.cls-14{stroke:#65beea;stroke-linejoin:bevel;stroke-width:7px;stroke-dasharray:125 1000;}.cls-15{font-size:40.98px;}.cls-16{font-size:30.3px;}.cls-17{fill:#60bc50;}.cls-18{font-size:20.3px;}.cls-19{fill:#33ce18;}
         </style>
         </defs>
 
         <title>Epson glass02</title>
-        <g><rect width="1028" height="720" style="fill:#ff0000"/></g>
+        <!-- <g><rect width="1028" height="720" style="fill:#ff0000"/></g> -->
         <g id="data">
         <text class="cls-1" transform="translate(949 78)">times</text>
         <text class="cls-2" transform="translate(876.56 77.57)" id="spark">--</text>
@@ -79,6 +82,7 @@
 
         <script type="text/javascript" src="../static/dat.gui.js"></script>
 
+        <script type="text/javascript" src="../static/d3.min.js"></script>
         <!--  Custom Shader Code
         source by stemkoski
         https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Shader-Glow.html -->        
@@ -493,6 +497,168 @@
                 floorFolder.add( floor.material, 'roughness', 0, 1);
                 floorFolder.add( floor.material, 'metalness', 0, 1);
         }
+
+
+
+        // #######################################
+        // ##########                   ##########
+        // ##########  DATA CODE BEGIN  ##########
+        // ##########                   ##########
+        // #######################################
+
+     var TAU = 2 * Math.PI;
+
+     
+     var updateInt = 1000;
+     /* var speedX = 5000;
+        var tarLen = 200000;
+        var defaultStartLen = 0;*/
+     var speedX = 1;
+     var tarLen = 260;
+     var defaultStartLen = 200;
+     
+     var curSpeed = 250;
+     var maxSpeed = 500;
+     var avgSpeed = curSpeed;
+     var curLen = defaultStartLen;
+     var spark = 2;
+     var prevSpark = spark;
+     var timeLeft = '23:59:59';
+     var totSecLeft = 0;
+     
+     
+     function updateState() {
+
+         curSpeed += 5;
+         curLen += speedX * curSpeed / 60;
+         curSpeed >= 300 ? curSpeed = 200 :0;
+         curLen >= tarLen ? (curLen = defaultStartLen, spark = 0) :0;
+         curLen >= tarLen ? spark = 0 :0;
+         Math.random() < 1/5 ? spark += 1 :0;
+         
+         avgSpeed = avgSpeed * 0.95 + curSpeed * 0.05;
+         totSecLeft = Math.ceil((tarLen - curLen) / avgSpeed * 60);
+         var secLeft = totSecLeft % 60;
+         var minLeft = totSecLeft/60 % 60;
+         var hrLeft = totSecLeft/3600;
+
+         
+         timeLeft = ("00" + hrLeft.toFixed()).slice(-2) + ':' +
+             ("00" + minLeft.toFixed()).slice(-2) + ':' +
+             ("00" + secLeft.toFixed()).slice(-2)
+     }
+
+
+     // glowing effect
+     var g2 = d3.select("g")
+     //Container for the gradients
+     var defs = g2.append("defs");
+     //Filter for the outside glow
+     var filter = defs.append("filter")
+              .attr("id","glow");
+     filter.append("feGaussianBlur")
+           .attr("stdDeviation","0")
+           .attr("result","coloredBlur");
+     var feMerge = filter.append("feMerge");
+     feMerge.append("feMergeNode")
+        .attr("id","coloredBlur");
+     feMerge.append("feMergeNode")
+        .attr("in","SourceGraphic");
+
+
+     d3.selectAll(".spark")
+       .style("filter", "url(#glow)");
+
+     
+     // arctween
+     var g = d3.select("g")
+           .append("g")
+           .attr("transform", "translate("+116.94+","+445.85+")");
+     var arc = d3.arc()
+             .innerRadius(78)
+             .outerRadius(86)
+             .startAngle(0);
+     var progBar = g.append("path")
+            .datum({endAngle: 0})
+            .style("fill", "lightskyblue")
+            .attr("d", arc);
+     function arcTween(newAngle) {
+         return function(d) {
+         var interpolate = d3.interpolate(d.endAngle, newAngle);
+         return function(t) {
+             d.endAngle = interpolate(t)
+             return arc(d);
+         };
+         };
+     }
+
+     
+     // meter
+     /* min angle: -75
+        max angle: 170 */
+     var prevAngle = -75
+     var speedPtr = d3.select('#speedPtr').attr('transform', 'rotate(-75, 491.7, 63.6)');
+     function angTween(newData) {
+         return function(d) {
+         var intAng = d3.interpolate(-75, 170);
+         var newAngle = intAng(newData);
+         var interpolate = d3.interpolate(prevAngle, newAngle);
+         prevAngle = newAngle;
+         return function(t) {
+             return "rotate(" + interpolate(t) + ", 491.7, 63.6)";
+         };
+         };
+     }
+
+
+     setInterval(function() {
+         updateState();
+
+         progBar.transition()
+            .duration(1000)
+            .attrTween("d", arcTween(curLen/tarLen * TAU));
+         speedPtr.transition()
+             .duration(300)
+             .attrTween("transform", angTween(curSpeed/maxSpeed));
+
+         if (spark != prevSpark) {
+         d3.selectAll(".spark")
+           .transition(500)
+           .style("fill", "#FFFF00")
+           .transition(1500).delay(500)
+           .style("fill", "#FFFFFF");
+
+         d3.selectAll(".sparkPolyline")
+           .transition(500)
+           .style("stroke", "#FFFF00")
+           .transition(1500).delay(500)
+           .style("stroke", "#FFFFFF");
+
+         /* d3.selectAll(".sparkglow")
+            .transition(500)
+            .style("filter", "url(#glow)")
+            .transition(1200).delay(500)
+            .style("filter", "");*/
+
+         
+         filter.select("feGaussianBlur").transition(500)
+               .attr("stdDeviation", "5")
+               .transition(1500).delay(500)
+               .attr("stdDeviation", "0");
+
+         prevSpark = spark;
+         }
+         
+         document.getElementById("speed").innerHTML = curSpeed.toFixed();
+         document.getElementById("tarLen").innerHTML = ("000000" + tarLen.toFixed()).slice(6);
+         document.getElementById("curLen").innerHTML = ("000000" + curLen.toFixed()).slice(6);
+         document.getElementById("timeLeft").innerHTML = timeLeft;
+         document.getElementById("spark").innerHTML = spark.toString();
+     }, updateInt);
+
+
+
+
 
     </script>
 
