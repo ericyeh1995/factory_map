@@ -27,3 +27,6 @@ __pycache__/
 
 # obj files
 __*
+
+# clips
+clips/guides/*

@@ -60,6 +60,13 @@
         <script type="text/javascript" src="../static/Detector.js"></script>
         <script type="text/javascript" src="../static/stats.min.js"></script>
 
+        <script type="text/javascript" src="../static/CopyShader.js"></script>
+        <script type="text/javascript" src="../static/FXAAShader.js"></script>
+        <script type="text/javascript" src="../static/EffectComposer.js"></script>
+        <script type="text/javascript" src="../static/RenderPass.js"></script>
+        <script type="text/javascript" src="../static/ShaderPass.js"></script>
+        <script type="text/javascript" src="../static/OutlinePass.js"></script>
+
         <script type="text/javascript" src="../static/dat.gui.js"></script>
 
 
@@ -91,10 +98,11 @@
         var raycaster;
         var mouse = new THREE.Vector2(), INTERSECTED;
         var interactive_objects = [];
+        var scaleSelect = 1.;
 
         var gui;
 
-        var composer;
+        var composer, effectFXAA, outlinePass;
 
         init();
         animate();
@@ -115,7 +123,7 @@
 
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.renderReverseSided = false;
-            //renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
             // SCENE
             scene = new THREE.Scene();
@@ -134,7 +142,7 @@
             controls.enablePan = true;
             controls.maxPolarAngle = Math.PI / 2;
             controls.enableDamping = true;
-            controls.dampingFactor = 1;
+            controls.dampingFactor = 0.5;
             controls.update();
 
             // LIGHT
@@ -180,9 +188,8 @@
                     objLoader.setMaterials(materials);
                     objLoader.setPath(modelPath);
                     objLoader.load(modelName+'.obj', function(object) {
-
                         obj_mesh = object.children[0];
-                        obj_mesh.receiveShadow = true;
+                        obj_mesh.receiveShadow = false;
                         obj_mesh.castShadow = true;
                         obj_mesh.position.set(0, 0, 0);
                         obj_mesh.name = modelName;
@@ -190,7 +197,7 @@
                         if (modelName != 'building') {
                             makeInteractive(obj_mesh)
                         } else {
-                            obj_mesh.receiveShadow = true;
+                            obj_mesh.receiveShadow = false;
                         }
 
                         scene.add(obj_mesh);
@@ -205,7 +212,7 @@
             var floor_mat = new THREE.MeshStandardMaterial({
                 color: 0xc8c8c8,
                 //emissive: 0x191919
-                metalness: 0,
+                metalness: 0.7,
                 opacity: 0.5,
                 transparent: false
             });
@@ -241,9 +248,24 @@
 
 
             // POSTPROCESSING
-            // composer = new THREE.EffectComposer( renderer );
-            // var renderPass = new THREE.RenderPass( scene, camera );
-            // composer.addPass( renderPass );
+            composer = new THREE.EffectComposer( renderer );
+
+            var renderPass = new THREE.RenderPass( scene, camera );
+            composer.addPass( renderPass );
+
+            outlinePass = new THREE.OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera );
+            outlinePass.edgeStrength = 5;
+            outlinePass.edgeGlow = 0;
+            outlinePass.edgeThickness = 1.5;
+            outlinePass.visibleEdgeColor.set(0xff0000);
+            outlinePass.hiddenEdgeColor.set(0x000000);
+
+            composer.addPass( outlinePass );
+
+            effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+            effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+            effectFXAA.renderToScreen = true;
+            composer.addPass( effectFXAA );
 
 
             // INTERACTIVE
@@ -284,11 +306,11 @@
                 if (INTERSECTED != intersects[0].object) {
                     if (INTERSECTED) onDeselect(INTERSECTED);
                     INTERSECTED = intersects[0].object;
-                    onSelect(INTERSECTED, 1.1);
+                    onSelect(INTERSECTED);
                 }
             } else {
-                if (INTERSECTED) onDeselect(INTERSECTED);
-                INTERSECTED = null;
+                //if (INTERSECTED) onDeselect(INTERSECTED);
+                //INTERSECTED = null;
             }
 
             // CAMERA ROTATE ON START
@@ -300,12 +322,21 @@
             // NORMAL RENDER STUFF
             spotLightHelper.update();
             
+            
             renderer.render(scene, camera);
             // renderer.render( outScene, camera )
             labelRenderer.render(scene, camera);
+            composer.render();
         }
 
-
+        var onDeselect = function(mesh) {
+            outlinePass.selectedObjects = [];
+            scaleLocal(mesh, 1);
+        };
+        var onSelect = function(mesh) {
+            outlinePass.selectedObjects = [mesh.object];
+            scaleLocal(mesh, scaleSelect);
+        };
 
         // HELPER FUNCTIONS
         function makeInteractive(mesh){ 
@@ -334,7 +365,7 @@
                 wireframe: true,
                 transparent: true,
                 opacity: 0.2,
-                visible: true // <- SETTING
+                visible: false // <- SETTING
             }));
             selectable.position.set(
                 mesh.center.x + mesh.position.x,
@@ -345,10 +376,6 @@
             scene.add(selectable);
             interactive_objects.push(selectable);
         }
-
-        var onDeselect = function(mesh) { scaleLocal(mesh, 1); };
-
-        var onSelect = function(mesh) { scaleLocal(mesh, 1.1); };
 
         function scaleLocal(box, scale) {
             // since the origin of the object is at global origin, we need 
@@ -372,6 +399,10 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            // POSTPROCESSING
+            composer.setSize(window.innerWidth, window.innerHeight);
+            effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
         }
 
         function onDocumentMouseMove(event) {
@@ -403,7 +434,12 @@
                     'spotlight color': spotLight.color.getHex(),
 
                     'floor color': floor.material.color.getHex(),
-                    'floor emissive': floor.material.emissive.getHex()
+                    'floor emissive': floor.material.emissive.getHex(),
+
+                    'visibleEdgeColor': outlinePass.visibleEdgeColor.getHex(),
+                    'hiddenEdgeColor': outlinePass.hiddenEdgeColor.getHex(),
+                    'scaleSelect': scaleSelect
+
                 }
 
                 var sceneFolder = gui.addFolder('Scene');
@@ -432,6 +468,16 @@
                 floorFolder.addColor( params, 'floor emissive').onChange(function(val){ floor.material.emissive.setHex(val) });
                 floorFolder.add( floor.material, 'roughness', 0, 1);
                 floorFolder.add( floor.material, 'metalness', 0, 1);
+
+                var selectFolder = gui.addFolder( 'Selection' );
+                selectFolder.add( params, 'scaleSelect', 1, 1.2 );
+                selectFolder.add( outlinePass, 'edgeStrength', 0, 10 );
+                selectFolder.add( outlinePass, 'edgeGlow', 0, 2 );
+                selectFolder.add( outlinePass, 'edgeThickness', 0, 5 );
+                selectFolder.addColor( params, 'visibleEdgeColor').onChange(function(val){ outlinePass.visibleEdgeColor.setHex(val) });
+                selectFolder.addColor( params, 'hiddenEdgeColor').onChange(function(val){ outlinePass.hiddenEdgeColor.setHex(val) });
+
+
         }
 
     </script>

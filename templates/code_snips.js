@@ -136,3 +136,26 @@ scene.add( mesh );
             scene.add(mesh);
             makeInteractive(mesh);
 
+
+
+            // old intersect code
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(interactive_objects);
+            if (intersects.length > 0) {
+                if (INTERSECTED != intersects[0].object) {
+                    if (INTERSECTED) onDeselect(INTERSECTED);
+                    INTERSECTED = intersects[0].object;
+                    onSelect(INTERSECTED);
+                }
+            } else {
+                if (INTERSECTED) onDeselect(INTERSECTED);
+                INTERSECTED = null;
+            }
+
+
+
+        var onDeselect = function(mesh) { scaleLocal(mesh, 1); };
+        var onSelect = function(mesh) { scaleLocal(mesh, 1.1); };
+
+
+
