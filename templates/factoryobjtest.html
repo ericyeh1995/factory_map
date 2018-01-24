@@ -37,7 +37,7 @@
 
     <div id="data">
             <div>
-                <p> Extruder 2</p>
+                <h1 id='machine_name'> Extruder 2</h1>
             </div>
         
             <div>
@@ -288,6 +288,8 @@
 
             // STATS
             stats = new Stats();
+            stats.domElement.style.position   = 'absolute';
+            stats.domElement.style.top = '200px';
             container.appendChild(stats.dom);
         } // end init
 
@@ -336,6 +338,9 @@
         var onSelect = function(mesh) {
             outlinePass.selectedObjects = [mesh.object];
             scaleLocal(mesh, scaleSelect);
+            document.getElementById("machine_name").innerHTML = mesh.object.name;
+
+            
         };
 
         // HELPER FUNCTIONS
